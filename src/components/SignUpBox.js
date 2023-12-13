@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
 import { app } from '../firebase';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 function SignUpBox() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
+    const [isChecked, setIsChecked] = useState(false);
     const navigate = useNavigate();
     const handleSignUp = async () => {
         if (!validateEmail(email)) {
             setError('Please enter a valid email address.');
+            return;
+        }
+
+        if (!isChecked){
+            setError('Please Accept our Privacy Policy.');
             return;
         }
 
@@ -24,8 +30,16 @@ function SignUpBox() {
             })
             .catch((error) => {
                 const errorCode = error.code;
-                const errorMessage = error.message;
-                setError(errorMessage); // Set the error message for display
+                let errorMessage = error.message;
+
+                // Modify errorMessage as per your requirement
+                const index = errorMessage.indexOf('('); // Find the index of the first '('
+                if (index > 10) {
+                    // Omit the first 10 characters and the content inside parentheses
+                    errorMessage = errorMessage.substring(10, index) + errorMessage.substring(errorMessage.indexOf(')') + 1);
+                }
+
+                setError(errorMessage); // Set the modified error message for display
                 console.error("Error creating user:", error);
             });
     };
@@ -39,7 +53,7 @@ function SignUpBox() {
     return (
         <div className="flex items-center justify-center h-fit">
             <div className="card w-96 bg-base-100 shadow-xl">
-                <div className="card-body">
+                <div className="card-body pb-2">
                     <h1 className="text-2xl font-bold">Sign Up for OnYva</h1>
                     <label className="form-control w-full max-w-xs">
                         <div className="label">
@@ -53,7 +67,13 @@ function SignUpBox() {
                         </div>
                         <input type="password" className="input input-bordered w-full max-w-xs" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
                     </label>
+                    <label className="label cursor-pointer">
+                        <span className="label-text">I have read and agreed to the <Link to={"/Privacy"}>Privacy Policy </Link> </span>
+                        <input required={true} type="checkbox" className="checkbox" checked={isChecked}
+                               onChange={(e) => setIsChecked(e.target.checked)} />
+                    </label>
                 </div>
+
                 <div className="card-actions justify-center mb-3">
                     <button className="btn btn-primary" onClick={handleSignUp}>Sign Up</button>
                 </div>
