@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { auth } from '../firebase';
+import { auth } from '../services/firebase';
 import LoginSelection from "./LoginSelection";
 const withAuthCheck = (WrappedComponent) => {
     const WithAuthCheck = (props) => {

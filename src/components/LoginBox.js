@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { app } from '../firebase';
+import { app } from '../services/firebase';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
 function LoginBox() {

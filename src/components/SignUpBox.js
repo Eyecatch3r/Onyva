@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
-import { app } from '../firebase';
+import { app,db } from '../services/firebase';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import {Link, useNavigate} from 'react-router-dom';
+import { collection, addDoc, getDocs } from "firebase/firestore";
+
 function SignUpBox() {
+    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
     const [isChecked, setIsChecked] = useState(false);
     const navigate = useNavigate();
     const handleSignUp = async () => {
+        if(!validateUsername(username)){
+            setError('Username already in use.')
+        }
+
         if (!validateEmail(email)) {
             setError('Please enter a valid email address.');
             return;
@@ -21,9 +28,14 @@ function SignUpBox() {
 
         const auth = getAuth(app);
         createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
+            .then(async (userCredential) => {
                 // Signed in
                 const user = userCredential.user;
+                const docRef =  await addDoc(collection(db,"User"), {
+                    username: username,
+                    useruid: user.uid,
+                    score: 0
+                })
                 console.log("User created:", user);
                 navigate("/");
                 // Additional actions after successful signup
@@ -44,17 +56,33 @@ function SignUpBox() {
             });
     };
 
-    // Email validation function using regex
     const validateEmail = (email) => {
         const re = /\S+@\S+\.\S+/;
         return re.test(email);
     };
+
+    const validateUsername = async (username) => {
+        let usernameTaken = false;
+
+        const querySnapshot = await getDocs(collection(db, "Users"));
+        querySnapshot.forEach((doc) => {
+            doc.data().username === username ? usernameTaken = true : usernameTaken = true
+        });
+
+        return usernameTaken;
+    }
 
     return (
         <div className="flex items-center justify-center h-fit">
             <div className="card w-96 bg-base-100 shadow-xl">
                 <div className="card-body pb-2">
                     <h1 className="text-2xl font-bold">Sign Up for OnYva</h1>
+                    <label className="form-control w-full max-w-xs">
+                        <div className="label">
+                            <span className="label-text">Username</span>
+                        </div>
+                        <input type="text" className="input input-bordered w-full max-w-xs" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
+                    </label>
                     <label className="form-control w-full max-w-xs">
                         <div className="label">
                             <span className="label-text">E-Mail Address</span>
