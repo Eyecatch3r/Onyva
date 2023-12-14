@@ -1,11 +1,11 @@
-import '../App.css';
-import LoginBox from "../components/LoginBox"
+import "../App.css";
+import LoginBox from "../components/LoginBox";
 function Login() {
-    return (
-        <div className={"App"}>
-            <LoginBox></LoginBox>
-        </div>
-    );
+  return (
+    <div className={"App"}>
+      <LoginBox></LoginBox>
+    </div>
+  );
 }
 
 export default Login;
