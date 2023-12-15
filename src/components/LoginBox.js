@@ -25,7 +25,7 @@ function LoginBox() {
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
-        setError(errorMessage); // Set the error message for display
+        setError("Wrong E-mail/Password"); // Set the error message for display
         console.error("Error signing in:", error);
       });
   };

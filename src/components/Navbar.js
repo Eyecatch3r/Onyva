@@ -1,6 +1,8 @@
 import React from "react";
 import "../App.css";
 import { Link } from "react-router-dom";
+import { auth, signOutAccount } from "../services/firebase";
+
 const Navbar = () => {
   return (
     <div className="navbar bg-base-100">
@@ -44,7 +46,7 @@ const Navbar = () => {
               <Link to={"/Settings"}>Settings</Link>
             </li>
             <li>
-              <Link to={"/Logout"}>Logout</Link>
+              <p onClick={signOutAccount}>Sign Out</p>
             </li>
           </ul>
         </div>

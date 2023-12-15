@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 export async function registerUser(userCredential, username) {
@@ -11,6 +11,12 @@ export async function registerUser(userCredential, username) {
   console.log("User created:", user);
 }
 
+export async function getUserByUID(UID) {
+  const querySnapshot = await getDocs(collection(db, "User"));
+  const user = querySnapshot.docs.find((doc) => doc.data().useruid === UID);
+  return user ? user.data() : null;
+}
+
 export const validateUsername = async (username) => {
   let usernameTaken = false;
 
@@ -18,7 +24,7 @@ export const validateUsername = async (username) => {
   querySnapshot.forEach((doc) => {
     doc.data().username === username
       ? (usernameTaken = true)
-      : (usernameTaken = true);
+      : (usernameTaken = false);
   });
 
   return usernameTaken;
