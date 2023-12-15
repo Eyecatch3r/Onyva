@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { app, db } from "../services/firebase";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "../services/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { collection, addDoc, getDocs } from "firebase/firestore";
+import { registerUser, validateUsername } from "../services/persistence/user";
 
 function SignUpBox() {
   const [username, setUsername] = useState("");
@@ -11,6 +12,19 @@ function SignUpBox() {
   const [error, setError] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
   const navigate = useNavigate();
+
+  function trimErrorMessage(errorMessage) {
+    // Modify errorMessage as per your requirement
+    const index = errorMessage.indexOf("("); // Find the index of the first '('
+    if (index > 10) {
+      // Omit the first 10 characters and the content inside parentheses
+      errorMessage =
+        errorMessage.substring(10, index) +
+        errorMessage.substring(errorMessage.indexOf(")") + 1);
+    }
+    return errorMessage;
+  }
+
   const handleSignUp = async () => {
     if (!validateUsername(username)) {
       setError("Username already in use.");
@@ -26,33 +40,16 @@ function SignUpBox() {
       return;
     }
 
-    const auth = getAuth(app);
     createUserWithEmailAndPassword(auth, email, password)
       .then(async (userCredential) => {
         // Signed in
-        const user = userCredential.user;
-        const docRef = await addDoc(collection(db, "User"), {
-          username: username,
-          useruid: user.uid,
-          score: 0,
-        });
-        console.log("User created:", user);
+        await registerUser(userCredential, username);
         navigate("/");
         // Additional actions after successful signup
       })
       .catch((error) => {
         const errorCode = error.code;
-        let errorMessage = error.message;
-
-        // Modify errorMessage as per your requirement
-        const index = errorMessage.indexOf("("); // Find the index of the first '('
-        if (index > 10) {
-          // Omit the first 10 characters and the content inside parentheses
-          errorMessage =
-            errorMessage.substring(10, index) +
-            errorMessage.substring(errorMessage.indexOf(")") + 1);
-        }
-
+        let errorMessage = trimErrorMessage(error.message);
         setError(errorMessage); // Set the modified error message for display
         console.error("Error creating user:", error);
       });
@@ -61,19 +58,6 @@ function SignUpBox() {
   const validateEmail = (email) => {
     const re = /\S+@\S+\.\S+/;
     return re.test(email);
-  };
-
-  const validateUsername = async (username) => {
-    let usernameTaken = false;
-
-    const querySnapshot = await getDocs(collection(db, "Users"));
-    querySnapshot.forEach((doc) => {
-      doc.data().username === username
-        ? (usernameTaken = true)
-        : (usernameTaken = true);
-    });
-
-    return usernameTaken;
   };
 
   return (

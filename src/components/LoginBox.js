@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { app } from "../services/firebase";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { app, auth } from "../services/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+
 function LoginBox() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,7 +14,6 @@ function LoginBox() {
       return;
     }
 
-    const auth = getAuth(app);
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
