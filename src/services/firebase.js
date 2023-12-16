@@ -1,4 +1,11 @@
-import { getAuth, signOut } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
@@ -18,6 +25,21 @@ export const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 
+export const sendVerificationEmail = (user) => {
+  return sendEmailVerification(user);
+};
+
+export const resetPasswordEmail = (auth, email) => {
+  return sendPasswordResetEmail(auth, email);
+};
+
+export const createUser = (email, password) => {
+  return createUserWithEmailAndPassword(auth, email, password);
+};
+
+export const signIn = (email, password) => {
+  return signInWithEmailAndPassword(auth, email, password);
+};
 export const signOutAccount = () => {
   return signOut(auth);
 };
