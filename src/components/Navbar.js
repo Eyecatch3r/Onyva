@@ -1,9 +1,23 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../App.css";
 import { Link } from "react-router-dom";
 import { auth, signOutAccount } from "../services/firebase";
+import { getPfpUrl } from "../services/persistence/user";
+import withAuthCheck from "./AuthComponent";
 
 const Navbar = () => {
+  const [imageUrl, setImageUrl] = useState(null);
+
+  useEffect(() => {
+    async function fetchdata() {
+      const url = await getPfpUrl(auth.currentUser.uid);
+      if (url) {
+        setImageUrl(url);
+      }
+    }
+
+    fetchdata();
+  }, []);
   return (
     <div className="navbar bg-base-100">
       <div className="flex-1">
@@ -26,10 +40,14 @@ const Navbar = () => {
             className="btn btn-ghost btn-circle avatar"
           >
             <div className="w-10 rounded-full">
-              <img
-                alt="Tailwind CSS Navbar component"
-                src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
-              />
+              {imageUrl ? (
+                <img alt="Tailwind CSS Navbar component" src={imageUrl} />
+              ) : (
+                <img
+                  alt="Tailwind CSS Navbar component"
+                  src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+                />
+              )}
             </div>
           </div>
           <ul
@@ -55,4 +73,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default withAuthCheck(Navbar);

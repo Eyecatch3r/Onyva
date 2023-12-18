@@ -1,17 +1,40 @@
 import "../App.css";
 import { app, db, auth } from "../services/firebase";
-import { collection, addDoc, getDocs } from "firebase/firestore";
-import { getUser, getUserByUID } from "../services/persistence/user";
-import { useEffect, useState } from "react";
+import {
+  getUserByUID,
+  getPfpUrl,
+  updatePfp,
+} from "../services/persistence/user";
+import { useEffect, useRef, useState } from "react";
 import withAuthCheck from "../components/AuthComponent";
+import { convertToJpg } from "../services/imageService";
 
 function Profile() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [emailVerified, setEmailVerified] = useState(false);
+  const [imageUrl, setImageUrl] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const fileConverted = await convertToJpg(file);
+      return await updatePfp(auth.currentUser.uid, file);
+    }
+  };
+
+  const handleProfileClick = () => {
+    fileInputRef.current.click();
+  };
+
   useEffect(() => {
     async function fetchData() {
       try {
+        const url = await getPfpUrl(auth.currentUser.uid);
+        if (url) {
+          setImageUrl(url);
+        }
         const user = await getUserByUID(auth.currentUser.uid);
         user ? setUsername(user.username) : setUsername("");
         setEmail(auth.currentUser.email);
@@ -50,8 +73,32 @@ function Profile() {
           )}
           <h1 className="card-title">Profile Info</h1>
           <div className="avatar">
-            <div className="w-24 rounded-full">
-              <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+            <div className="relative w-24 overflow-hidden rounded-full transition duration-300 ease-in-out group">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                className="hidden"
+              />
+              <div onClick={handleProfileClick}>
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt="Avatar"
+                    className="transform hover:scale-105 transition duration-300 ease-in-out"
+                  />
+                ) : (
+                  <img
+                    src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+                    alt="Avatar"
+                    className="transform hover:scale-105 transition duration-300 ease-in-out"
+                  />
+                )}
+                <p className="opacity-0 absolute inset-0 flex items-center justify-center text-white bg-black bg-opacity-75 group-hover:opacity-100 transition duration-300 ease-in-out">
+                  Change Profile Picture
+                </p>
+              </div>
             </div>
           </div>
           <table className={"table"}>

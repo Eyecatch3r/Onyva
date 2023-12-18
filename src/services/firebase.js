@@ -9,6 +9,7 @@ import {
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -43,6 +44,8 @@ export const signIn = (email, password) => {
 export const signOutAccount = () => {
   return signOut(auth);
 };
+
+export const storage = getStorage(app);
 
 const analytics = getAnalytics(app);
 export const db = getFirestore(app);

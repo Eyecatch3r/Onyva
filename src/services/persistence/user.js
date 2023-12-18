@@ -1,9 +1,10 @@
-import { addDoc, collection, getDocs, doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { addDoc, collection, getDocs } from "firebase/firestore";
+import { db, storage } from "../firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 export async function registerUser(userCredential, username) {
   const user = userCredential.user;
-  const docRef = await addDoc(collection(db, "User"), {
+  await addDoc(collection(db, "User"), {
     username: username,
     useruid: user.uid,
     score: 0,
@@ -26,6 +27,29 @@ export const validateUsername = async (username) => {
       ? (usernameTaken = true)
       : (usernameTaken = false);
   });
-
   return usernameTaken;
+};
+
+export const getPfpUrl = async (uid) => {
+  let url = null;
+  try {
+    url = await getDownloadURL(ref(storage, "Images/Profile Pictures/" + uid));
+  } catch (error) {
+    console.log(error);
+  }
+
+  return url;
+};
+
+export const updatePfp = async (uid, pfp) => {
+  const storageRef = ref(storage, `Images/Profile Pictures/${uid}`);
+
+  try {
+    uploadBytes(storageRef, pfp).then((snapshot) => {
+      console.log("Uploaded Pfp");
+    });
+  } catch (error) {
+    console.error("Error updating profile picture: ", error);
+    return error.message;
+  }
 };
