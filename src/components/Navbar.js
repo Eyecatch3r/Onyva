@@ -2,37 +2,41 @@ import React, { useEffect, useState } from "react";
 import "../App.css";
 import { Link } from "react-router-dom";
 import { auth, signOutAccount } from "../services/firebase";
-import { getPfpUrl } from "../services/persistence/user";
+import { getPfpUrl, getUserByUID } from "../services/persistence/user";
 import withAuthCheck from "./AuthComponent";
 
 const Navbar = () => {
   const [imageUrl, setImageUrl] = useState(null);
-
+  const [score, setScore] = useState(null);
   useEffect(() => {
     async function fetchdata() {
       const url = await getPfpUrl(auth.currentUser.uid);
       if (url) {
         setImageUrl(url);
       }
+      const user = await getUserByUID(auth.currentUser.uid);
+
+      setScore(user.score);
     }
 
     fetchdata();
   }, []);
   return (
-    <div className="navbar bg-base-100">
-      <div className="flex-1">
+    <div className="navbar bg-base-200">
+      <div className="navbar-start">
         <Link to={"/"} className="btn btn-ghost text-xl">
           onYva
         </Link>
       </div>
-      <div className="flex-none gap-2">
-        <div className="form-control">
-          <input
-            type="text"
-            placeholder="Search"
-            className="input input-bordered w-24 md:w-auto"
-          />
+      <div className="navbar-center">
+        <div className="stats shadow">
+          <div className="stat flex-wrap">
+            <div className="stat-title">Score</div>
+            <div className="stat-value text-center">{score}</div>
+          </div>
         </div>
+      </div>
+      <div className="navbar-end">
         <div className="dropdown dropdown-end">
           <div
             tabIndex={0}
