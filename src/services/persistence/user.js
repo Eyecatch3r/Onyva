@@ -1,4 +1,11 @@
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+} from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
@@ -9,13 +16,13 @@ export async function registerUser(userCredential, username) {
     useruid: user.uid,
     score: 0,
   });
-  console.log("User created:", user);
+  console.log("User created:", user); // Log the user for debugging purposes
 }
 
 export async function getUserByUID(UID) {
   const querySnapshot = await getDocs(collection(db, "User"));
   const user = querySnapshot.docs.find((doc) => doc.data().useruid === UID);
-  return user ? user.data() : null;
+  return user ? user : null;
 }
 
 export const validateUsername = async (username) => {
@@ -52,4 +59,12 @@ export const updatePfp = async (uid, pfp) => {
     console.error("Error updating profile picture: ", error);
     return error.message;
   }
+};
+
+export const getPostsByUID = async (uid) => {
+  const user = await getUserByUID(uid);
+  const userRef = doc(db, "User", user.id);
+  const q = query(collection(db, "Post"), where("User", "!=", userRef.path));
+  console.log(getDocs(q));
+  return await getDocs(q);
 };

@@ -16,7 +16,7 @@ const Navbar = () => {
       }
       const user = await getUserByUID(auth.currentUser.uid);
 
-      setScore(user.score);
+      setScore(user.data().score);
     }
 
     fetchdata();
@@ -77,4 +77,4 @@ const Navbar = () => {
   );
 };
 
-export default withAuthCheck(Navbar);
+export default Navbar;

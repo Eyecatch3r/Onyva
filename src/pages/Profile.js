@@ -1,5 +1,5 @@
 import "../App.css";
-import { app, db, auth } from "../services/firebase";
+import { auth } from "../services/firebase";
 import {
   getUserByUID,
   getPfpUrl,
@@ -36,7 +36,7 @@ function Profile() {
           setImageUrl(url);
         }
         const user = await getUserByUID(auth.currentUser.uid);
-        user ? setUsername(user.username) : setUsername("");
+        user ? setUsername(user.data().username) : setUsername("");
         setEmail(auth.currentUser.email);
         setEmailVerified(auth.currentUser.emailVerified);
       } catch (error) {

@@ -1,5 +1,5 @@
 import withAuthCheck from "./AuthComponent";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 function BottomNav() {
   const location = useLocation();
@@ -58,4 +58,4 @@ function BottomNav() {
   );
 }
 
-export default withAuthCheck(BottomNav);
+export default BottomNav;
