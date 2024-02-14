@@ -1,11 +1,11 @@
 import {
   addDoc,
   collection,
-  getDocs,
+  doc,
   getDoc,
+  getDocs,
   query,
   where,
-  doc,
 } from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -101,12 +101,9 @@ export const getPostsByUID = async (uid) => {
   return await getDocs(q);
 };
 
-export const getFriendList = async (uid) => {
-  const user = await getUserByUID(uid);
-  const userRef = doc(db, "User", user.id);
-  const q = query(
-    collection(db, "Friendlist"),
-    where("User", "==", userRef.path),
-  );
-  return await getDocs(q);
+export const getFriendList = async (id) => {
+  const userRef = doc(db, "User", id);
+  const q = query(collection(db, "Friendlist"), where("User", "==", userRef));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => doc.data().friends[0]);
 };

@@ -6,7 +6,7 @@ import {
   getUserByID,
   getPfpUrlByID,
 } from "../services/persistence/user";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import withAuthCheck from "../components/AuthComponent";
 import { convertToJpg } from "../services/imageService";
 import { useParams } from "react-router-dom";
@@ -17,9 +17,10 @@ function Profile() {
   const [email, setEmail] = useState("");
   const [emailVerified, setEmailVerified] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
-  const [friendsList, setFriendList] = useState([]);
+  const [friendList, setFriendList] = useState([]);
   const fileInputRef = useRef(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [score, setScore] = useState(0);
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -34,6 +35,11 @@ function Profile() {
     }
   };
 
+  const getFriendPfp = async (ID) => {
+    const url = await getPfpUrlByID(ID);
+    return url;
+  };
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -43,16 +49,23 @@ function Profile() {
           setImageUrl(url);
         }
         const user = await getUserByID(userId);
+        let friends = null;
         if (user) {
+          setScore(user.score);
           setUsername(user.username);
           setIsOwnProfile(user.useruid === auth.currentUser.uid);
+          friends = await getFriendList(userId);
         }
 
         setEmailVerified(auth.currentUser.emailVerified);
 
-        const friends = await getFriendList(auth.currentUser.uid);
         if (friends) {
-          setFriendList(friends.docs);
+          const friendList = [];
+          for (const friend of friends) {
+            const friendData = await getUserByID(friend.id);
+            friendList.push({ data: friendData, id: friend.id });
+          }
+          setFriendList(friendList);
         }
       } catch (error) {
         // Handle errors if needed
@@ -61,7 +74,7 @@ function Profile() {
     }
 
     fetchData();
-  }, [userId]); // Empty dependency array to run this effect only once (on mount)
+  }, [userId]);
 
   useEffect(() => {
     if (isOwnProfile) {
@@ -70,7 +83,7 @@ function Profile() {
   }, [isOwnProfile]); // This effect runs whenever `isOwnProfile` changes
   return (
     <div className={"App"}>
-      <div className="card bg-base-100 shadow-xl">
+      <div className="overflow-y-auto card bg-base-100 shadow-xl">
         <div className="card-body items-center text-center">
           {isOwnProfile && !emailVerified && (
             <div role="alert" className="alert alert-warning">
@@ -125,6 +138,12 @@ function Profile() {
               </div>
             </div>
           </div>
+          <div className="stats shadow">
+            <div className="stat flex-wrap">
+              <div className="stat-title">Score</div>
+              <div className="stat-value text-center">{score}</div>
+            </div>
+          </div>
           <table className={"table"}>
             <tbody>
               <tr>
@@ -161,37 +180,32 @@ function Profile() {
             <table className="table">
               <thead>
                 <tr>
+                  <th></th>
                   <th>Username</th>
                   <th>Score</th>
                 </tr>
               </thead>
               <tbody>
-                {friendsList.map((friend, index) => (
+                {friendList.map((friend, index) => (
                   <tr key={index}>
                     <td>
                       <div className="flex items-center gap-3">
                         <div className="avatar">
                           <div className="mask mask-squircle w-12 h-12">
-                            <img src={""} alt="Avatar" />
-                          </div>
-                        </div>
-                        <div>
-                          <div className="font-bold">{friend.username}</div>
-                          <div className="text-sm opacity-50">
-                            {friend.country}
+                            <img
+                              src={
+                                getFriendPfp(friend.id) &&
+                                "https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+                              }
+                              alt="Avatar"
+                            />
                           </div>
                         </div>
                       </div>
                     </td>
+                    <td>{friend.data.username}</td>
                     <td>
-                      {friend.job}
-                      <br />
-                      <span className="badge badge-ghost badge-sm">
-                        {friend.jobTitle}
-                      </span>
-                    </td>
-                    <td>{friend.favoriteColor}</td>
-                    <td>
+                      {friend.data.score}
                       <button className="btn btn-ghost btn-xs">Details</button>
                     </td>
                   </tr>
