@@ -2,25 +2,41 @@ import React, { useEffect, useState } from "react";
 import "../App.css";
 import { Link } from "react-router-dom";
 import { auth, signOutAccount } from "../services/firebase";
-import { getPfpUrl, getUserByUID } from "../services/persistence/user";
+import {
+  getPfpUrlByID,
+  getPfpUrlByUID,
+  getUserByID,
+  getUserByUID,
+} from "../services/persistence/user";
 import withAuthCheck from "./AuthComponent";
 
 const Navbar = () => {
+  const [user, setUser] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [score, setScore] = useState(null);
-  useEffect(() => {
-    async function fetchdata() {
-      const url = await getPfpUrl(auth.currentUser.uid);
-      if (url) {
-        setImageUrl(url);
-      }
-      const user = await getUserByUID(auth.currentUser.uid);
 
-      setScore(user.data().score);
+  async function fetchData() {
+    const currentUser = await getUserByUID(auth.currentUser.uid);
+    setUser(currentUser);
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Use score directly from currentUser after it's set
+  useEffect(() => {
+    async function fetchUserData() {
+      if (user) {
+        const url = await getPfpUrlByID(user.id);
+        setImageUrl(url);
+        setScore(user.data().score);
+      }
     }
 
-    fetchdata();
-  }, []);
+    fetchUserData();
+  }, [user]);
+
   return (
     <div className="navbar bg-base-200">
       <div className="navbar-start">
@@ -45,10 +61,10 @@ const Navbar = () => {
           >
             <div className="w-10 rounded-full">
               {imageUrl ? (
-                <img alt="Tailwind CSS Navbar component" src={imageUrl} />
+                <img alt="User Avatar" src={imageUrl} />
               ) : (
                 <img
-                  alt="Tailwind CSS Navbar component"
+                  alt="Default Avatar"
                   src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
                 />
               )}
@@ -58,14 +74,19 @@ const Navbar = () => {
             tabIndex={0}
             className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
           >
+            {user && (
+              <li>
+                <Link
+                  className="justify-between"
+                  to={{ pathname: `/profile/${user.id}` }}
+                >
+                  Profile
+                  <span className="badge">New</span>
+                </Link>
+              </li>
+            )}
             <li>
-              <a className="justify-between" href={"/profile"}>
-                Profile
-                <span className="badge">New</span>
-              </a>
-            </li>
-            <li>
-              <Link to={"/Settings"}>Settings</Link>
+              <Link to={"/settings"}>Settings</Link>
             </li>
             <li>
               <p onClick={signOutAccount}>Sign Out</p>

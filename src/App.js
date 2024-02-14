@@ -12,7 +12,7 @@ function App() {
       <Route path="/" element={<Home />}></Route>
       <Route path={"/login"} element={<Login />}></Route>
       <Route path={"/signup"} element={<SignUp />}></Route>
-      <Route path={"/profile"} element={<Profile />}></Route>
+      <Route path={"/profile/:userId"} element={<Profile />}></Route>
       <Route path={"/resetpassword"} element={<ResetPassword />}></Route>
     </Routes>
   );

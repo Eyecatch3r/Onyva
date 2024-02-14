@@ -1,58 +1,78 @@
 import "../App.css";
 import { auth } from "../services/firebase";
 import {
-  getUserByUID,
-  getPfpUrl,
   updatePfp,
+  getFriendList,
+  getUserByID,
+  getPfpUrlByID,
 } from "../services/persistence/user";
 import { useEffect, useRef, useState } from "react";
 import withAuthCheck from "../components/AuthComponent";
 import { convertToJpg } from "../services/imageService";
+import { useParams } from "react-router-dom";
 
 function Profile() {
+  const { userId } = useParams();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [emailVerified, setEmailVerified] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
+  const [friendsList, setFriendList] = useState([]);
   const fileInputRef = useRef(null);
-
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
       const fileConverted = await convertToJpg(file);
-      return await updatePfp(auth.currentUser.uid, file);
+      return await updatePfp(userId, file);
     }
   };
 
   const handleProfileClick = () => {
-    fileInputRef.current.click();
+    if (fileInputRef && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const url = await getPfpUrl(auth.currentUser.uid);
+        const url = await getPfpUrlByID(userId);
+
         if (url) {
           setImageUrl(url);
         }
-        const user = await getUserByUID(auth.currentUser.uid);
-        user ? setUsername(user.data().username) : setUsername("");
-        setEmail(auth.currentUser.email);
+        const user = await getUserByID(userId);
+        if (user) {
+          setUsername(user.username);
+          setIsOwnProfile(user.useruid === auth.currentUser.uid);
+        }
+
         setEmailVerified(auth.currentUser.emailVerified);
+
+        const friends = await getFriendList(auth.currentUser.uid);
+        if (friends) {
+          setFriendList(friends.docs);
+        }
       } catch (error) {
         // Handle errors if needed
-        console.error("Error fetching username:", error);
+        console.error("Error fetching data:", error);
       }
     }
 
     fetchData();
-  }, []); // Empty dependency array to run this effect only once (on mount)
+  }, [userId]); // Empty dependency array to run this effect only once (on mount)
 
+  useEffect(() => {
+    if (isOwnProfile) {
+      setEmail(auth.currentUser.email);
+    }
+  }, [isOwnProfile]); // This effect runs whenever `isOwnProfile` changes
   return (
     <div className={"App"}>
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body items-center text-center">
-          {!emailVerified && (
+          {isOwnProfile && !emailVerified && (
             <div role="alert" className="alert alert-warning">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -74,13 +94,15 @@ function Profile() {
           <h1 className="card-title">Profile Info</h1>
           <div className="avatar">
             <div className="relative w-24 overflow-hidden rounded-full transition duration-300 ease-in-out group">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                ref={fileInputRef}
-                className="hidden"
-              />
+              {isOwnProfile && (
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  ref={fileInputRef}
+                  className="hidden"
+                />
+              )}
               <div onClick={handleProfileClick}>
                 {imageUrl ? (
                   <img
@@ -95,9 +117,11 @@ function Profile() {
                     className="transform hover:scale-105 transition duration-300 ease-in-out"
                   />
                 )}
-                <p className="opacity-0 absolute inset-0 flex items-center justify-center text-white bg-black bg-opacity-75 group-hover:opacity-100 transition duration-300 ease-in-out">
-                  Change Profile Picture
-                </p>
+                {isOwnProfile && (
+                  <p className="opacity-0 absolute inset-0 flex items-center justify-center text-white bg-black bg-opacity-75 group-hover:opacity-100 transition duration-300 ease-in-out">
+                    Change Profile Picture
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -113,18 +137,68 @@ function Profile() {
                   </p>
                 </td>
               </tr>
-              <tr>
-                <td>
-                  <p>
-                    <div className="badge badge-primary badge-lg mr-2">
-                      E-Mail Address
-                    </div>
-                    <span>{email}</span>
-                  </p>
-                </td>
-              </tr>
+              {isOwnProfile && (
+                <tr>
+                  <td>
+                    <p>
+                      <div className="badge badge-primary badge-lg mr-2">
+                        E-Mail Address
+                      </div>
+                      <span>{email}</span>
+                    </p>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <div className="card bg-base-100 shadow-xl items-center text-center">
+        <div>
+          <h1 className={"card-title"}>Friends List</h1>
+          <div className="overflow-x-auto">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {friendsList.map((friend, index) => (
+                  <tr key={index}>
+                    <td>
+                      <div className="flex items-center gap-3">
+                        <div className="avatar">
+                          <div className="mask mask-squircle w-12 h-12">
+                            <img src={""} alt="Avatar" />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-bold">{friend.username}</div>
+                          <div className="text-sm opacity-50">
+                            {friend.country}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      {friend.job}
+                      <br />
+                      <span className="badge badge-ghost badge-sm">
+                        {friend.jobTitle}
+                      </span>
+                    </td>
+                    <td>{friend.favoriteColor}</td>
+                    <td>
+                      <button className="btn btn-ghost btn-xs">Details</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

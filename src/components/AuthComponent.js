@@ -4,6 +4,7 @@ import LoginSelection from "./LoginSelection";
 import LoadingScreen from "./LoadingScreen";
 import Navbar from "./Navbar";
 import BottomNav from "./BottomNav";
+import { getUserByUID } from "../services/persistence/user";
 
 const withAuthCheck = (WrappedComponent) => {
   return (props) => {
@@ -15,7 +16,6 @@ const withAuthCheck = (WrappedComponent) => {
         setUser(authUser);
         setIsLoading(false);
       });
-
       return () => unsubscribe();
     }, []);
 

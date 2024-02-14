@@ -2,6 +2,7 @@ import {
   addDoc,
   collection,
   getDocs,
+  getDoc,
   query,
   where,
   doc,
@@ -25,6 +26,25 @@ export async function getUserByUID(UID) {
   return user ? user : null;
 }
 
+export async function getUserByID(ID) {
+  try {
+    const documentReference = doc(db, "User", ID);
+    const documentSnapshot = await getDoc(documentReference);
+
+    if (documentSnapshot.exists()) {
+      // Extract the user data from the document snapshot
+      const userData = documentSnapshot.data();
+      return userData;
+    } else {
+      // User document does not exist
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting user:", error);
+    return null;
+  }
+}
+
 export const validateUsername = async (username) => {
   let usernameTaken = false;
 
@@ -37,8 +57,9 @@ export const validateUsername = async (username) => {
   return usernameTaken;
 };
 
-export const getPfpUrl = async (uid) => {
+export const getPfpUrlByUID = async (uid) => {
   let url = null;
+  await getUserByUID(uid);
   try {
     url = await getDownloadURL(ref(storage, "Images/Profile Pictures/" + uid));
   } catch (error) {
@@ -48,8 +69,19 @@ export const getPfpUrl = async (uid) => {
   return url;
 };
 
-export const updatePfp = async (uid, pfp) => {
-  const storageRef = ref(storage, `Images/Profile Pictures/${uid}`);
+export const getPfpUrlByID = async (id) => {
+  let url = null;
+  try {
+    url = await getDownloadURL(ref(storage, "Images/Profile Pictures/" + id));
+  } catch (error) {
+    console.log(error);
+  }
+
+  return url;
+};
+
+export const updatePfp = async (id, pfp) => {
+  const storageRef = ref(storage, `Images/Profile Pictures/${id}`);
 
   try {
     uploadBytes(storageRef, pfp).then((snapshot) => {
@@ -66,5 +98,15 @@ export const getPostsByUID = async (uid) => {
   const userRef = doc(db, "User", user.id);
   const q = query(collection(db, "Post"), where("User", "!=", userRef.path));
   console.log(getDocs(q));
+  return await getDocs(q);
+};
+
+export const getFriendList = async (uid) => {
+  const user = await getUserByUID(uid);
+  const userRef = doc(db, "User", user.id);
+  const q = query(
+    collection(db, "Friendlist"),
+    where("User", "==", userRef.path),
+  );
   return await getDocs(q);
 };
