@@ -6,6 +6,7 @@ import {
   getDocs,
   query,
   where,
+  updateDoc,
 } from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -16,6 +17,7 @@ export async function registerUser(userCredential, username) {
     username: username,
     useruid: user.uid,
     score: 0,
+    notifications: [],
   });
   console.log("User created:", user); // Log the user for debugging purposes
 }
@@ -107,3 +109,27 @@ export const getFriendList = async (id) => {
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map((doc) => doc.data().friends[0]);
 };
+
+export async function getNotificationsByUID(uid) {
+  const querySnapshot = await getDocs(collection(db, "User"));
+  const user = querySnapshot.docs.find((doc) => doc.data().useruid === uid);
+  return user ? user.data().notifications : [];
+}
+
+export async function deleteNotificationByIndex(id, index) {
+  const userDoc = doc(db, "User", id);
+  const userSnapshot = await getDoc(userDoc);
+
+  if (userSnapshot.exists()) {
+    const userData = userSnapshot.data();
+    const notifications = userData.notifications;
+
+    // Remove the notification at the given index
+    notifications.splice(index, 1);
+
+    // Update the notifications field in the user document
+    await updateDoc(userDoc, { notifications: notifications });
+  } else {
+    console.log(`No user found with uid: ${id}`);
+  }
+}
