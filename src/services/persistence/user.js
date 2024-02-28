@@ -103,11 +103,27 @@ export const getPostsByUID = async (uid) => {
   return await getDocs(q);
 };
 
-export const getFriendList = async (id) => {
-  const userRef = doc(db, "User", id);
-  const q = query(collection(db, "Friendlist"), where("User", "==", userRef));
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map((doc) => doc.data().friends[0]);
+export const getFriendList = async (uid) => {
+  const userDoc = await getUserByUID(uid);
+  if (userDoc) {
+    const userData = userDoc.data();
+    const friendsRefs = userData.friends || [];
+    const friends = [];
+
+    for (let i = 0; i < friendsRefs.length; i++) {
+      const friendId = String(friendsRefs[i].id); // Ensure that friendId is a string
+      const friendDoc = doc(db, "User", friendId);
+      const friendSnapshot = await getDoc(friendDoc);
+      if (friendSnapshot.exists()) {
+        friends.push(friendSnapshot);
+      }
+    }
+
+    return friends;
+  } else {
+    console.log(`No user found with uid: ${uid}`);
+    return null;
+  }
 };
 
 export async function getNotificationsByUID(uid) {
@@ -132,4 +148,66 @@ export async function deleteNotificationByIndex(id, index) {
   } else {
     console.log(`No user found with uid: ${id}`);
   }
+}
+
+export async function addFriend(CurrentUserUID, friendId) {
+  const userCollectionRef = collection(db, "User");
+  const q = query(userCollectionRef, where("useruid", "==", CurrentUserUID));
+  const querySnapshot = await getDocs(q);
+  const currentUserDoc = querySnapshot.docs[0];
+
+  const friendUserDoc = doc(db, "User", friendId);
+
+  if (currentUserDoc) {
+    const currentUserData = currentUserDoc.data();
+    const friends = currentUserData.friends || [];
+
+    if (!friends.includes(friendUserDoc)) {
+      friends.push(friendUserDoc);
+
+      await updateDoc(currentUserDoc.ref, { friends: friends });
+    } else {
+      console.log(`User with id: ${friendId} is already a friend.`);
+    }
+  } else {
+    console.log(`No user found with uid: ${CurrentUserUID}`);
+  }
+}
+
+export async function removeFriend(CurrentUserUID, friendId) {
+  const userCollectionRef = collection(db, "User");
+  const q = query(userCollectionRef, where("useruid", "==", CurrentUserUID));
+  const querySnapshot = await getDocs(q);
+  const currentUserDoc = querySnapshot.docs[0];
+
+  if (currentUserDoc) {
+    const currentUserData = currentUserDoc.data();
+    const friends = currentUserData.friends || [];
+
+    const friendIndex = friends.findIndex(
+      (friendRef) => friendRef.id === friendId.id,
+    );
+    if (friendIndex !== -1) {
+      friends.splice(friendIndex, 1);
+      await updateDoc(currentUserDoc.ref, { friends: friends });
+    } else {
+      console.log(`User with id: ${friendId} is not a friend.`);
+    }
+  } else {
+    console.log(`No user found with uid: ${CurrentUserUID}`);
+  }
+}
+
+export async function getUsers(searchTerm) {
+  // Get a reference to the 'User' collection
+  const userCollectionRef = collection(db, "User");
+
+  // Create a query that retrieves users whose username matches the search term
+  const q = query(userCollectionRef, where("username", "==", searchTerm));
+
+  // Execute the query and get a snapshot of the matching documents
+  const querySnapshot = await getDocs(q);
+
+  // Map the documents in the snapshot to their data and return the resulting array
+  return querySnapshot.docs.map((doc) => doc);
 }

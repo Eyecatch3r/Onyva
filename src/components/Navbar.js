@@ -24,6 +24,7 @@ const Navbar = () => {
   }
 
   useEffect(() => {
+    console.log("Navbar mounted");
     fetchData();
   }, []);
 
@@ -34,15 +35,14 @@ const Navbar = () => {
         const url = await getPfpUrlByID(user.id);
         setImageUrl(url);
         setScore(user.data().score);
-        const userNotifications = await getNotificationsByUID(
-          auth.currentUser.uid,
-        );
+        const userNotifications = user.data().notifications;
         setNotifications(userNotifications);
+        console.log("User fetched");
       }
     }
 
     fetchUserData();
-  }, [user, notifications]);
+  }, [user]);
 
   function handleNotificationDelete(index) {
     deleteNotificationByIndex(user.id, index);

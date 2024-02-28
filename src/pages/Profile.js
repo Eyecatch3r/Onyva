@@ -5,6 +5,7 @@ import {
   getFriendList,
   getUserByID,
   getPfpUrlByID,
+  removeFriend,
 } from "../services/persistence/user";
 import React, { useEffect, useRef, useState } from "react";
 import withAuthCheck from "../components/AuthComponent";
@@ -55,7 +56,7 @@ function Profile() {
           setScore(user.score);
           setUsername(user.username);
           setIsOwnProfile(user.useruid === auth.currentUser.uid);
-          friends = await getFriendList(userId);
+          friends = user.friends;
         }
 
         setEmailVerified(auth.currentUser.emailVerified);
@@ -64,7 +65,8 @@ function Profile() {
           const friendList = [];
           for (const friend of friends) {
             const friendData = await getUserByID(friend.id);
-            friendList.push({ data: friendData, id: friend.id });
+            console.log(friendData);
+            friendList.push({ data: friendData, id: friend });
           }
           setFriendList(friendList);
         }
@@ -82,6 +84,15 @@ function Profile() {
       setEmail(auth.currentUser.email);
     }
   }, [isOwnProfile]); // This effect runs whenever `isOwnProfile` changes
+  function handleFriendRemove(uid, id) {
+    try {
+      removeFriend(uid, id);
+      setFriendList(friendList.filter((friend) => friend.id !== id));
+    } catch (error) {
+      console.error("Error removing friend:", error);
+    }
+  }
+
   return (
     <div className={"App"}>
       <div className="overflow-y-auto card bg-base-100 shadow-xl">
@@ -192,7 +203,7 @@ function Profile() {
             </svg>
           </button>
           {showFriendsList && (
-            <div className="overflow-x-auto">
+            <div className="overflow-auto" style={{ paddingBottom: "50px" }}>
               <div className="divider divider-primary">Friends</div>
               <table className="table">
                 <thead>
@@ -231,10 +242,31 @@ function Profile() {
                         {friend.data.username}
                         <Link to={`/profile/${friend.id}`} key={index} />
                       </td>
-                      <td className={"rounded-r-3xl text-center"}>
+                      <td
+                        className={
+                          isOwnProfile
+                            ? "text-center"
+                            : "rounded-r-3xl text-center"
+                        }
+                      >
                         {friend.data.score}
                         <Link to={`/profile/${friend.id}`} key={index} />
                       </td>
+                      {isOwnProfile && (
+                        <td className={"rounded-r-3xl"}>
+                          <button
+                            onClick={() =>
+                              handleFriendRemove(
+                                auth.currentUser.uid,
+                                friend.id,
+                              )
+                            }
+                            className="btn btn-primary btn-sm"
+                          >
+                            Remove friend
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

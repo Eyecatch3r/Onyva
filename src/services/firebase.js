@@ -7,7 +7,7 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 import { getStorage } from "firebase/storage";
 
@@ -49,3 +49,7 @@ export const storage = getStorage(app);
 
 const analytics = getAnalytics(app);
 export const db = getFirestore(app);
+
+if (window.location.hostname === "localhost") {
+  //connectFirestoreEmulator(db, "localhost", 8080);
+}

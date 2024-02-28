@@ -18,7 +18,7 @@ function UserPostsList() {
   }, []);
 
   return (
-    <div>
+    <div className={"overflow-y-auto"} style={{ paddingBottom: "50px" }}>
       {posts ? (
         posts.map((p) => (
           <div className={"overflow-x-auto"}>
