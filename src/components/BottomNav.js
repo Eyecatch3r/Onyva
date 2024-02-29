@@ -13,13 +13,11 @@ function BottomNav() {
     <div className="btm-nav">
       <a
         href={"/"}
-        data-te-ripple-init
         className={
           location.pathname === "/" ? `text-primary active` : `text-primary`
         }
       >
         <button
-          data-te-ripple-init
           className={
             location.pathname === "/" ? `text-primary active` : `text-primary`
           }
@@ -31,13 +29,11 @@ function BottomNav() {
       </a>
       <a
         href={"/map"}
-        data-te-ripple-init
         className={
           location.pathname === "/map" ? `text-primary active` : `text-primary`
         }
       >
         <button
-          data-te-ripple-init
           className={
             location.pathname === "/map"
               ? `text-primary active`
@@ -60,7 +56,6 @@ function BottomNav() {
       </a>
       <a
         href={"/search"}
-        data-te-ripple-centered="true"
         className={
           location.pathname === "/search"
             ? `text-primary active`
@@ -68,7 +63,6 @@ function BottomNav() {
         }
       >
         <button
-          data-te-ripple-init
           className={
             location.pathname === "/search"
               ? `text-primary active`

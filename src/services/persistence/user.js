@@ -98,8 +98,16 @@ export const updatePfp = async (id, pfp) => {
 export const getPostsByUID = async (uid) => {
   const user = await getUserByUID(uid);
   const userRef = doc(db, "User", user.id);
-  const q = query(collection(db, "Post"), where("User", "!=", userRef.path));
-  console.log(getDocs(q));
+  const q = query(collection(db, "Post"), where("User", "==", userRef));
+  return await getDocs(q);
+};
+
+export const getPostsByUserID = async (id) => {
+  const documentReference = doc(db, "User", id);
+  const q = query(
+    collection(db, "Post"),
+    where("User", "==", documentReference),
+  );
   return await getDocs(q);
 };
 

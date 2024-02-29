@@ -11,18 +11,19 @@ import React, { useEffect, useRef, useState } from "react";
 import withAuthCheck from "../components/AuthComponent";
 import { convertToJpg } from "../services/imageService";
 import { Link, useParams } from "react-router-dom";
+import UserPostsList from "../components/UserPostsList";
 
 function Profile() {
   const { userId } = useParams();
-  const [username, setUsername] = useState("");
+  const [user, setUser] = useState(null); // New user state variable
   const [email, setEmail] = useState("");
   const [emailVerified, setEmailVerified] = useState(true);
   const [imageUrl, setImageUrl] = useState(null);
   const [friendList, setFriendList] = useState([]);
   const fileInputRef = useRef(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
-  const [score, setScore] = useState(0);
   const [showFriendsList, setShowFriendsList] = useState(false);
+
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -50,13 +51,12 @@ function Profile() {
         if (url) {
           setImageUrl(url);
         }
-        const user = await getUserByID(userId);
+        const fetchedUser = await getUserByID(userId); // Fetch user data
         let friends = null;
-        if (user) {
-          setScore(user.score);
-          setUsername(user.username);
-          setIsOwnProfile(user.useruid === auth.currentUser.uid);
-          friends = user.friends;
+        if (fetchedUser) {
+          setUser(fetchedUser); // Set user state variable
+          setIsOwnProfile(fetchedUser.useruid === auth.currentUser.uid);
+          friends = fetchedUser.friends;
         }
 
         setEmailVerified(auth.currentUser.emailVerified);
@@ -153,7 +153,7 @@ function Profile() {
           <div className="stats shadow">
             <div className="stat flex-wrap">
               <div className="stat-title">Score</div>
-              <div className="stat-value text-center">{score}</div>
+              <div className="stat-value text-center">{user && user.score}</div>
             </div>
           </div>
           <table className={"table"}>
@@ -164,7 +164,7 @@ function Profile() {
                     <div className="badge badge-primary badge-lg mr-2">
                       Username
                     </div>
-                    {username}
+                    {user && user.username}
                   </p>
                 </td>
               </tr>
@@ -184,7 +184,6 @@ function Profile() {
           </table>
         </div>
       </div>
-
       <div className="card bg-base-100 shadow-xl items-center text-center">
         <div>
           <button
@@ -275,6 +274,8 @@ function Profile() {
           )}
         </div>
       </div>
+      <div className="divider divider-primary">User Posts</div>
+      {user && <UserPostsList user={user} userId={userId}></UserPostsList>}
     </div>
   );
 }

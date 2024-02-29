@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getUserByUID } from "./user";
@@ -16,9 +16,9 @@ export async function createPost(userCredential, image) {
 }
 
 export async function getPostByID(postID) {
-  const querySnapshot = await getDocs(collection(db, "Post"));
-  const post = querySnapshot.docs.find((doc) => doc.data().useruid === postID);
-  return post ? post.data() : null;
+  const documentReference = doc(db, "Post", postID);
+  const documentSnapshot = await getDoc(documentReference);
+  return documentSnapshot ? documentSnapshot.data() : null;
 }
 
 export const getPostUrl = async (postID) => {

@@ -80,7 +80,8 @@ function Search() {
           onClick={() => {
             handleSearch(inputRef.current.value);
           }}
-          data-te-ripple-init-center
+          data-te-ripple-init
+          data-te-ripple-centered="true"
           className="bg-primary relative px-3 py-2 -left-4 bg-none text-white  rounded"
         >
           <svg
@@ -97,13 +98,6 @@ function Search() {
           </svg>
         </button>
       </div>
-      <a href="#!" data-te-ripple-center={"true"}>
-        <img
-          src="https://tecdn.b-cdn.net/img/new/standard/city/043.jpg"
-          className="h-auto max-w-sm"
-          alt=""
-        />
-      </a>
       <div className="m-3 divider divider-primary">Results</div>
       <div className="flex justify-center m-3 overflow-auto">
         <table className="table">

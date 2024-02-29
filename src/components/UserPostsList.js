@@ -2,15 +2,19 @@ import withAuthCheck from "./AuthComponent";
 import UserPost from "./UserPost";
 import { auth } from "../services/firebase";
 import { useEffect, useState } from "react";
-import { getPostsByUID } from "../services/persistence/user";
+import { getPostsByUID, getPostsByUserID } from "../services/persistence/user";
 import { getPostUrl } from "../services/persistence/post";
+import { Link } from "react-router-dom";
 
-function UserPostsList() {
+function UserPostsList({ user, userId }) {
   const [posts, setPosts] = useState(null);
 
   async function getPosts() {
-    const listPosts = await getPostsByUID(auth.currentUser.uid);
-    setPosts(listPosts.docs);
+    if (user) {
+      // Check if user is not null
+      const listPosts = await getPostsByUserID(userId);
+      setPosts(listPosts.docs);
+    }
   }
 
   useEffect(() => {
@@ -22,7 +26,14 @@ function UserPostsList() {
       {posts ? (
         posts.map((p) => (
           <div className={"overflow-x-auto"}>
-            <UserPost key={p.id} post={p} />
+            <Link
+              data-te-ripple-init
+              data-te-ripple-centered="true"
+              to={"/post/" + p.id}
+              params={{ post: p.id }}
+            >
+              <UserPost key={p.id} post={p} />
+            </Link>
           </div>
         ))
       ) : (

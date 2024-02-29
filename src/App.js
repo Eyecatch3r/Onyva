@@ -6,6 +6,7 @@ import SignUp from "./pages/SignUp";
 import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import ResetPassword from "./pages/ResetPassword";
+import Post from "./pages/Post";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path={"/profile/:userId"} element={<Profile />}></Route>
       <Route path={"/resetpassword"} element={<ResetPassword />}></Route>
       <Route path={"/search"} element={<Search />}></Route>
+      <Route path={"/post/:postId"} element={<Post />}></Route>
     </Routes>
   );
 }
