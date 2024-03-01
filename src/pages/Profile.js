@@ -65,8 +65,8 @@ function Profile() {
           const friendList = [];
           for (const friend of friends) {
             const friendData = await getUserByID(friend.id);
-            console.log(friendData);
-            friendList.push({ data: friendData, id: friend });
+            console.log(friend.id);
+            friendList.push({ data: friendData, id: friend.id });
           }
           setFriendList(friendList);
         }

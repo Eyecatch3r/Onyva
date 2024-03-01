@@ -67,7 +67,7 @@ function SignUpBox() {
   };
 
   return (
-    <div className="flex items-center justify-center h-fit">
+    <div className="flex items-center justify-center h-fit my-52">
       <div className="card w-96 bg-base-100 shadow-xl">
         <div className="card-body pb-2">
           <h1 className="text-2xl font-bold">Sign Up for OnYva</h1>
@@ -123,7 +123,7 @@ function SignUpBox() {
             </label>
             <button
               type={"button"}
-              className="btn btn-primary"
+              className="btn btn-ghost"
               onClick={handleSignUp}
             >
               Sign Up

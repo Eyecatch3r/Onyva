@@ -20,7 +20,7 @@ function ResetPassword() {
 
   return (
     <div className={"App"}>
-      <div className="flex items-center justify-center h-fit">
+      <div className="flex items-center justify-center h-fit my-52">
         <div className="card w-96 bg-base-100 shadow-xl">
           <div className="card-body">
             <h1 className="text-2xl font-bold">Reset Password</h1>
@@ -40,7 +40,7 @@ function ResetPassword() {
               <div className={"flex justify-center"}>
                 <button
                   type={"button"}
-                  className="btn btn-primary mt-4"
+                  className="btn btn-ghost mt-4"
                   onClick={sendEmail}
                 >
                   Send Reset E-Mail

@@ -1,7 +1,7 @@
 import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { getUserByUID } from "./user";
+import { getFriendList, getPostsByUserID, getUserByUID } from "./user";
 
 export async function createPost(userCredential, image) {
   const user = userCredential.user;
@@ -30,6 +30,18 @@ export const getPostUrl = async (postID) => {
   }
 
   return url;
+};
+
+export const getFriendsPosts = async (uid) => {
+  const friends = await getFriendList(uid);
+  let allPosts = [];
+
+  for (let i = 0; i < friends.length; i++) {
+    const friendPosts = await getPostsByUserID(friends[i].id);
+    allPosts = [...allPosts, ...friendPosts.docs.map((doc) => doc.data())];
+  }
+
+  return allPosts;
 };
 
 export const updatePostImage = async (postID, image) => {

@@ -37,7 +37,7 @@ function LoginBox() {
   };
 
   return (
-    <div className="flex items-center justify-center h-fit">
+    <div className="flex items-center justify-center h-fit my-52">
       <div className="card w-96 bg-base-100 shadow-xl">
         <div className="card-body">
           <h1 className="text-2xl font-bold">Log in to OnYva</h1>
@@ -77,10 +77,10 @@ function LoginBox() {
             <div className="card-actions justify-center mb-3">
               <button
                 type={"button"}
-                className="btn btn-primary"
+                className="btn btn-ghost"
                 onClick={handleSignIn}
               >
-                Sign In
+                Login
               </button>
             </div>
           </form>
