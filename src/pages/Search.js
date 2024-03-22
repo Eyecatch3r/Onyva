@@ -137,11 +137,11 @@ function Search() {
                       </div>
                     </Link>
                   </td>
-                  <td className={"text-center"}>
+                  <td className={""}>
                     {user.data().username}
                     <Link to={`/profile/${user.id}`} key={index} />
                   </td>
-                  <td className={"rounded-r-3xl text-center"}>
+                  <td className={"rounded-r-3xl "}>
                     {user.data().score}
                     <Link to={`/profile/${user.id}`} key={index} />
                     {user.id !== auth.currentUser.uid &&

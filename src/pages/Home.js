@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../App.css";
 import withAuthCheck from "../components/AuthComponent";
-import UserPostsList from "../components/UserPostsList";
 import { getFriendsPosts } from "../services/persistence/post";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { auth } from "../services/firebase";
