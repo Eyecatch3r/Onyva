@@ -10,7 +10,7 @@ function BottomNav() {
 
   initTE({ Ripple });
   return (
-    <div className="btm-nav">
+    <div className="btm-nav h-[2.5rem]">
       <a
         href={"/"}
         className={

@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import withAuthCheck from "../components/AuthComponent";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import Popup from "../components/Popup";
+import _ from "lodash";
 
 const containerStyle = {
   width: "100%",
@@ -121,6 +123,105 @@ const options = {
   streetViewControl: false,
 };
 
+const optionsLightMode = {
+  styles: [
+    {
+      featureType: "all",
+      stylers: [{ visibility: "off" }], // turn off all features
+    },
+    {
+      featureType: "poi.attraction",
+      stylers: [{ visibility: "off" }], // turn on landmarks
+    },
+    {
+      featureType: "poi.business",
+      stylers: [{ visibility: "off" }], // turn on landmarks
+    },
+    {
+      featureType: "administrative",
+      stylers: [{ visibility: "on" }], // turn on landmarks
+    },
+    {
+      featureType: "landscape",
+      stylers: [{ visibility: "on" }], // turn on landmarks
+    },
+    {
+      featureType: "road",
+      stylers: [{ visibility: "on" }], // turn on landmarks
+    },
+    {
+      featureType: "water",
+      stylers: [{ visibility: "on" }], // turn on landmarks
+    },
+    {
+      featureType: "administrative",
+      elementType: "geometry",
+      stylers: [{ visibility: "on" }, { lightness: 30 }], // Slightly lighten administrative areas
+    },
+    {
+      featureType: "landscape",
+      elementType: "geometry",
+      stylers: [{ color: "#e3e3e3" }], // Light background for landscape features
+    },
+    {
+      featureType: "road",
+      elementType: "geometry",
+      stylers: [{ color: "#f5f5f5" }], // Roads with a very light color
+    },
+    {
+      featureType: "road",
+      elementType: "geometry.stroke",
+      stylers: [{ visibility: "off" }], // No strokes for roads to keep it cleaner
+    },
+    {
+      featureType: "water",
+      elementType: "geometry",
+      stylers: [{ color: "#aadaff" }], // Light blue water
+    },
+    {
+      featureType: "transit.line",
+      elementType: "geometry",
+      stylers: [{ visibility: "on" }, { lightness: 70 }], // Make transit lines more visible and lighter
+    },
+    {
+      elementType: "labels.text.stroke",
+      stylers: [{ visibility: "off" }], // Remove text strokes for clarity
+    },
+    {
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#616161" }], // Dark grey text for better readability
+    },
+    {
+      featureType: "administrative.locality",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#424242" }], // Darker text for locality labels for emphasis
+    },
+    {
+      featureType: "poi.park",
+      elementType: "geometry",
+      stylers: [{ color: "#c5e1a5" }], // Light green parks
+    },
+    {
+      featureType: "poi.park",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#616161" }], // Grey text for park labels
+    },
+    {
+      featureType: "road.highway",
+      elementType: "geometry.fill",
+      stylers: [{ color: "#ffffff" }], // White highways
+    },
+    {
+      featureType: "road.highway",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#757575" }], // Grey text for highway labels
+    },
+  ],
+  fullscreenControl: false,
+  mapTypeControl: false,
+  streetViewControl: false,
+};
+
 class CustomZoomControl extends Component {
   render() {
     return (
@@ -134,6 +235,7 @@ class CustomZoomControl extends Component {
 
 class MapPage extends Component {
   map = null;
+  popup = null;
 
   constructor(props) {
     super(props);
@@ -141,23 +243,46 @@ class MapPage extends Component {
       lat: 48.858358859763825,
       lng: 2.2940837889915406,
       markers: [],
+      activeMarker: null,
+      currentLocation: null,
+      prefersLightMode: window.matchMedia("(prefers-color-scheme: light)")
+        .matches,
+      isApiLoaded: false,
     };
   }
 
-  componentDidMount() {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        this.setState({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-      },
-      (error) => console.error(error),
-      { enableHighAccuracy: true },
-    );
-  }
+  componentDidMount() {}
 
-  fetchLandmarks = () => {
+  setCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.setState(
+            {
+              currentLocation: {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              },
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            },
+            () => {
+              // Now that the state has been updated with the current location, fetch landmarks.
+              this.fetchLandmarks();
+            },
+          );
+        },
+        (error) => console.error(error),
+        { enableHighAccuracy: true },
+      );
+    } else {
+      console.log("Geolocation is not supported by this browser.");
+      // Since geolocation is not supported, directly call fetchLandmarks to use the default location
+      this.fetchLandmarks();
+    }
+  };
+
+  fetchLandmarks = _.debounce(() => {
     if (!this.map || !window.google) {
       console.error("Google Maps API is not ready");
       return;
@@ -182,32 +307,91 @@ class MapPage extends Component {
         this.setState({ markers });
       }
     });
+  }, 1000);
+
+  handleApiLoaded = () => {
+    this.setState({ isApiLoaded: true });
+    this.setCurrentLocation();
+  };
+
+  onMarkerClick = (marker) => {
+    this.setState({ activeMarker: marker });
+  };
+
+  onCloseClick = () => {
+    this.setState({ activeMarker: null });
   };
 
   handleLoad = (map) => {
     this.map = map;
-    this.fetchLandmarks(); // Correctly placed inside handleLoad
   };
 
   renderMarkers = () => {
-    return this.state.markers.map((marker, index) => (
-      <Marker key={index} position={marker.position} title={marker.title} />
+    return this.state.markers.map((marker) => (
+      <Marker
+        key={marker.id}
+        position={marker.position}
+        onClick={() => this.onMarkerClick(marker)}
+        icon={{
+          // Specify your custom icon URL
+          url: `${process.env.PUBLIC_URL}/marker.png`,
+          scaledSize: new window.google.maps.Size(25, 25), // Scale your icon
+        }}
+      >
+        {this.state.activeMarker === marker && (
+          <Popup
+            map={this.map}
+            maps={window.google.maps}
+            position={marker.position}
+          >
+            <div
+              className={
+                "animate-fade-right animate-once animate-ease-out bg-base-300 p-6 rounded"
+              }
+            >
+              <h2 className={"font-bold text-xl mb-4"}>{marker.title}</h2>
+              <div className={"flex items-center justify-center"}>
+                <div className="stats shadow">
+                  <div className="stat flex-wrap">
+                    <div className="stat-title">Score</div>
+                    <div className="stat-value text-center">500</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Popup>
+        )}
+      </Marker>
     ));
   };
 
   render() {
+    const { currentLocation, prefersLightMode } = this.state;
     return (
       <LoadScript
         googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
         libraries={["places"]}
+        onLoad={this.handleApiLoaded}
       >
         <GoogleMap
           onLoad={this.handleLoad}
           mapContainerStyle={containerStyle}
-          center={{ lat: this.state.lat, lng: this.state.lng }}
+          center={
+            currentLocation || { lat: this.state.lat, lng: this.state.lng }
+          }
           zoom={15}
-          options={options}
+          options={prefersLightMode ? optionsLightMode : options}
         >
+          {this.state.isApiLoaded && currentLocation && (
+            <Marker
+              position={currentLocation}
+              icon={{
+                url: `${process.env.PUBLIC_URL}/currentLocation.png`, // Optional: Use a custom icon for the current location marker
+                scaledSize: new window.google.maps.Size(15, 15),
+              }}
+              title="Your Current Location"
+            />
+          )}
           {this.renderMarkers()}
           <CustomZoomControl />
         </GoogleMap>

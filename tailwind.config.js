@@ -25,5 +25,6 @@ module.exports = {
     require("@tailwindcss/postcss7-compat"),
     require("tailwindcss-ripple")(),
     require("tw-elements-react/dist/plugin.cjs"),
+    require("tailwindcss-animated"),
   ],
 };
