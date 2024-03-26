@@ -311,6 +311,7 @@ class MapPage extends Component {
 
   handleApiLoaded = () => {
     this.setState({ isApiLoaded: true });
+    console.log("API loaded");
     this.setCurrentLocation();
   };
 
