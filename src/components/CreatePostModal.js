@@ -1,13 +1,18 @@
 import React, { useState, useRef, useCallback } from "react";
 import { LoadScript } from "@react-google-maps/api";
+import { Capacitor } from "@capacitor/core";
+import { Geolocation } from "@capacitor/geolocation";
+
+const libraries = ["places"];
 
 function CreatePostModal() {
   const fileInputRef = useRef(null);
   const [landmarks, setLandmarks] = useState([]);
   const [selectedLandmark, setSelectedLandmark] = useState("");
-  const [location, setLocation] = useState({ lat: null, lng: null });
+  const [location, setLocation] = useState({ lat: 0, lng: 0 });
   const placesServiceRef = useRef(null);
   const [score, setScore] = useState(0);
+  const modalRef = useRef(null);
 
   const fetchLandmarks = useCallback(() => {
     if (placesServiceRef.current && location.lat && location.lng) {
@@ -20,10 +25,20 @@ function CreatePostModal() {
       placesServiceRef.current.nearbySearch(request, (results, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK) {
           setLandmarks(results);
+          console.log("Landmarks", results);
         }
       });
     }
   }, [location]);
+
+  const handleModalShow = () => {
+    if (modalRef.current) {
+      modalRef.current.showModal();
+    }
+    if (location.lat && location.lng) {
+      fetchLandmarks();
+    }
+  };
 
   // Triggered once the API script has loaded
   const handleApiLoaded = useCallback(() => {
@@ -36,18 +51,17 @@ function CreatePostModal() {
   }, [fetchLandmarks, location]);
 
   // Get the current location once when the component mounts
-  useState(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => console.error(error),
-        { enableHighAccuracy: true },
-      );
+  useState(async () => {
+    if (Capacitor.isPluginAvailable("Geolocation")) {
+      try {
+        const position = await Geolocation.getCurrentPosition();
+        setLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      } catch (error) {
+        console.error("Error getting location", error);
+      }
     } else {
       console.log("Geolocation is not supported by this browser.");
     }
@@ -65,7 +79,7 @@ function CreatePostModal() {
     <>
       <button
         className="btn btn-circle btn-primary flex items-center justify-center"
-        onClick={() => document.getElementById("my_modal_5").showModal()}
+        onClick={handleModalShow}
       >
         <svg
           className="w-6 h-6 ml-[1px] mt-[1px]"
@@ -79,10 +93,14 @@ function CreatePostModal() {
       </button>
       <LoadScript
         googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
-        libraries={["places"]}
+        libraries={libraries}
         onLoad={handleApiLoaded}
       >
-        <dialog id="my_modal_5" className="modal modal-bottom sm:modal-middle">
+        <dialog
+          id="my_modal"
+          className="modal modal-bottom sm:modal-middle"
+          ref={modalRef}
+        >
           <div className="modal-box">
             <h3 className="font-bold text-lg">Create a Post</h3>
             <div className="py-4">

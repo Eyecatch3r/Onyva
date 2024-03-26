@@ -3,6 +3,8 @@ import withAuthCheck from "../components/AuthComponent";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import Popup from "../components/Popup";
 import _ from "lodash";
+import { Capacitor } from "@capacitor/core";
+import { Geolocation } from "@capacitor/geolocation";
 
 const containerStyle = {
   width: "100%",
@@ -121,6 +123,7 @@ const options = {
   fullscreenControl: false,
   mapTypeControl: false,
   streetViewControl: false,
+  zoomControl: false,
 };
 
 const optionsLightMode = {
@@ -220,6 +223,7 @@ const optionsLightMode = {
   fullscreenControl: false,
   mapTypeControl: false,
   streetViewControl: false,
+  zoomControl: false,
 };
 
 class CustomZoomControl extends Component {
@@ -232,6 +236,8 @@ class CustomZoomControl extends Component {
     );
   }
 }
+
+const libraries = ["places"];
 
 class MapPage extends Component {
   map = null;
@@ -253,28 +259,25 @@ class MapPage extends Component {
 
   componentDidMount() {}
 
-  setCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          this.setState(
-            {
-              currentLocation: {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-              },
+  setCurrentLocation = async () => {
+    if (Capacitor.isPluginAvailable("Geolocation")) {
+      try {
+        const position = await Geolocation.getCurrentPosition();
+        this.setState(
+          {
+            currentLocation: {
               lat: position.coords.latitude,
               lng: position.coords.longitude,
             },
-            () => {
-              // Now that the state has been updated with the current location, fetch landmarks.
-              this.fetchLandmarks();
-            },
-          );
-        },
-        (error) => console.error(error),
-        { enableHighAccuracy: true },
-      );
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          },
+          this.fetchLandmarks,
+        );
+        console.log("Geolocation success:", position.coords);
+      } catch (error) {
+        console.error("Geolocation error:", error);
+      }
     } else {
       console.log("Geolocation is not supported by this browser.");
       // Since geolocation is not supported, directly call fetchLandmarks to use the default location
@@ -290,7 +293,7 @@ class MapPage extends Component {
 
     const request = {
       location: new window.google.maps.LatLng(this.state.lat, this.state.lng),
-      radius: "5000",
+      radius: "10000",
       type: ["tourist_attraction"],
     };
 
@@ -336,7 +339,7 @@ class MapPage extends Component {
         icon={{
           // Specify your custom icon URL
           url: `${process.env.PUBLIC_URL}/marker.png`,
-          scaledSize: new window.google.maps.Size(25, 25), // Scale your icon
+          scaledSize: new window.google.maps.Size(30, 30), // Scale your icon
         }}
       >
         {this.state.activeMarker === marker && (
@@ -350,7 +353,29 @@ class MapPage extends Component {
                 "animate-fade-right animate-once animate-ease-out bg-base-300 p-6 rounded"
               }
             >
-              <h2 className={"font-bold text-xl mb-4"}>{marker.title}</h2>
+              <div className="card-actions justify-end">
+                <h2 className={"font-bold text-xl mb-4"}>{marker.title}</h2>
+                <button
+                  onClick={() => this.onCloseClick()}
+                  className="btn btn-square btn-sm"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
               <div className={"flex items-center justify-center"}>
                 <div className="stats shadow">
                   <div className="stat flex-wrap">
@@ -371,7 +396,7 @@ class MapPage extends Component {
     return (
       <LoadScript
         googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
-        libraries={["places"]}
+        libraries={libraries}
         onLoad={this.handleApiLoaded}
       >
         <GoogleMap
