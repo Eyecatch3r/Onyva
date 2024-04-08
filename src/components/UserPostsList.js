@@ -1,9 +1,6 @@
-import withAuthCheck from "./AuthComponent";
 import UserPost from "./UserPost";
-import { auth } from "../services/firebase";
 import { useEffect, useState } from "react";
-import { getPostsByUID, getPostsByUserID } from "../services/persistence/user";
-import { getPostUrl } from "../services/persistence/post";
+import { getPostsByUserID } from "../services/persistence/user";
 import { Link } from "react-router-dom";
 
 function UserPostsList({ user, userId }) {

@@ -46,14 +46,15 @@ const Navbar = () => {
 
   function handleNotificationDelete(index) {
     deleteNotificationByIndex(user.id, index);
+    notifications.splice(index, 1);
   }
 
   return (
     <div className="navbar bg-base-200">
       <div className="navbar-start">
-        <Link to={"/"} className="btn btn-ghost text-xl">
+        <a href={"/"} className="btn btn-ghost text-xl">
           onYva
-        </Link>
+        </a>
       </div>
       <div className="navbar-center">
         <div className="stats shadow">

@@ -15,7 +15,22 @@ function UserPost({ post }) {
     fetchImageUrl();
   }, [post.id]);
 
-  const date = new Date(postData.Timestamp.seconds * 1000);
+  const convertToDate = (timestamp) => {
+    // Check if timestamp has toDate function (indicating Firestore Timestamp)
+    if (timestamp && typeof timestamp.toDate === "function") {
+      return timestamp.toDate();
+    }
+    // Handle case where timestamp might be stored differently
+    // This part depends on how your timestamp is stored if it's not a Firestore Timestamp
+    // For example, if it's a JavaScript Date object serialized as a string
+    if (timestamp && timestamp.seconds) {
+      return new Date(timestamp.seconds * 1000);
+    }
+    // Default to current time if unable to parse
+    return new Date();
+  };
+
+  const date = convertToDate(postData.Timestamp);
   const dateString = date.toLocaleDateString();
   const timeString = date.toLocaleTimeString();
   return (

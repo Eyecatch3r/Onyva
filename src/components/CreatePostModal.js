@@ -2,6 +2,13 @@ import React, { useState, useRef, useCallback } from "react";
 import { LoadScript } from "@react-google-maps/api";
 import { Capacitor } from "@capacitor/core";
 import { Geolocation } from "@capacitor/geolocation";
+import { createPost } from "../services/persistence/post";
+import { auth } from "../services/firebase";
+import {
+  addNotificationByID,
+  getUserByUID,
+  increaseScore,
+} from "../services/persistence/user";
 
 const libraries = ["places"];
 
@@ -13,6 +20,7 @@ function CreatePostModal() {
   const placesServiceRef = useRef(null);
   const [score, setScore] = useState(0);
   const modalRef = useRef(null);
+  const [imageURL, setImageURL] = useState("");
 
   const fetchLandmarks = useCallback(() => {
     if (placesServiceRef.current && location.lat && location.lng) {
@@ -75,6 +83,47 @@ function CreatePostModal() {
     fileInputRef.current.click();
   };
 
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageURL(reader.result.toString());
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImageURL(""); // Clear the image URL if no file is selected
+    }
+  };
+
+  function handlePostUpload() {
+    const file = fileInputRef.current.files[0];
+    if (file && selectedLandmark) {
+      createPost(
+        auth.currentUser,
+        file,
+        score,
+        selectedLandmark,
+        location,
+      ).then(() => {
+        if (modalRef.current) {
+          modalRef.current.close();
+        }
+        increaseScore(auth.currentUser.uid, score);
+        getUserByUID(auth.currentUser.uid).then((user) => {
+          addNotificationByID(
+            user.id,
+            "You have created a post with a score of " +
+              score +
+              " at " +
+              selectedLandmark +
+              "!",
+          );
+        });
+      });
+    }
+  }
+
   return (
     <>
       <button
@@ -118,13 +167,22 @@ function CreatePostModal() {
                   </option>
                 ))}
               </select>
+              {imageURL && (
+                <img
+                  src={imageURL}
+                  alt="Selected"
+                  className="max-w-full h-auto my-4"
+                />
+              )}
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 capture="environment"
                 className="hidden"
+                onChange={handleFileChange}
               />
+
               <div className={"flex flex-col items-center justify-center"}>
                 {score !== 0 ? (
                   <div className="stats shadow my-2">
@@ -178,7 +236,13 @@ function CreatePostModal() {
               </div>
             </div>
             <div className="modal-action">
-              <button className="btn">Post</button>
+              <button
+                disabled={!selectedLandmark || !imageURL}
+                onClick={handlePostUpload}
+                className="btn"
+              >
+                Post
+              </button>
               <form method="dialog">
                 <button className="btn btn-ghost">Close</button>
               </form>

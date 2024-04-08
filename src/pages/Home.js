@@ -31,7 +31,29 @@ function Home() {
           dataLength={posts.length}
           next={fetchMoreData}
           hasMore={hasMore}
-          loader={<h4>Loading...</h4>}
+          loader={
+            <div>
+              <div className="skeleton flex flex-col gap-4 w-52 mb-4">
+                <div className="flex gap-4 items-center">
+                  <div className="skeleton w-16 h-16 rounded-full shrink-0"></div>
+                  <div className="flex flex-col gap-4">
+                    <div className="skeleton h-4 w-20"></div>
+                    <div className="skeleton h-4 w-28"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="skeleton flex flex-col gap-4 w-52 mb-4">
+                <div className="flex gap-4 items-center">
+                  <div className="skeleton w-16 h-16 rounded-full shrink-0"></div>
+                  <div className="flex flex-col gap-4">
+                    <div className="skeleton h-4 w-20"></div>
+                    <div className="skeleton h-4 w-28"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
           endMessage={
             <p className="text-center">
               <b>That's all for now!</b>

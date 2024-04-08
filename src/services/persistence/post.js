@@ -1,18 +1,38 @@
-import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  Timestamp,
+  GeoPoint,
+} from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getFriendList, getPostsByUserID, getUserByUID } from "./user";
 
-export async function createPost(userCredential, image) {
-  const user = userCredential.user;
-  const docUser = await getUserByUID(user.uid);
+export async function createPost(
+  userCredential,
+  image,
+  score,
+  locationName,
+  location,
+) {
+  const user = await getUserByUID(userCredential.uid);
+  const userRef = doc(db, "User", user.id);
+  const geoPoint = new GeoPoint(location.lat, location.lng);
   const docRef = await addDoc(collection(db, "Post"), {
-    userID: `User/${docUser.id}`,
-    score: 55,
+    User: userRef,
+    "Location Name": locationName,
+    location: geoPoint,
+    Score: score,
+    Timestamp: Timestamp.now(),
+    Likes: 0,
   });
+
   const newPostID = docRef.id;
   await updatePostImage(newPostID, image);
-  console.log("Post created:", user);
+  console.log("Post created:", user.id);
 }
 
 export async function getPostByID(postID) {

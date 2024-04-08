@@ -7,6 +7,7 @@ import {
   query,
   where,
   updateDoc,
+  arrayUnion,
 } from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -155,6 +156,51 @@ export async function deleteNotificationByIndex(id, index) {
     await updateDoc(userDoc, { notifications: notifications });
   } else {
     console.log(`No user found with uid: ${id}`);
+  }
+}
+
+export async function addNotificationByID(id, notification) {
+  const userDocRef = doc(db, "User", id);
+
+  try {
+    // Fetch the current user document to ensure it exists
+    const userDocSnapshot = await getDoc(userDocRef);
+    if (!userDocSnapshot.exists()) {
+      console.log(`No user found with UID: ${id}`);
+      return;
+    }
+
+    // Update the document with the new notification using arrayUnion to ensure uniqueness
+    await updateDoc(userDocRef, {
+      notifications: arrayUnion(notification),
+    });
+
+    console.log(`Notification added for user ${id}`);
+  } catch (error) {
+    console.error("Error adding notification:", error);
+  }
+}
+
+export async function increaseScore(UID, incrementAmount) {
+  try {
+    // Use the getUserByUID function to get the user document snapshot
+    const userDocSnapshot = await getUserByUID(UID);
+
+    if (userDocSnapshot && userDocSnapshot.exists()) {
+      const userData = userDocSnapshot.data();
+      const currentScore = userData.score || 0; // Default to 0 if score is not set
+
+      // Use the ref property of the document snapshot for updating
+      await updateDoc(userDocSnapshot.ref, {
+        score: currentScore + incrementAmount,
+      });
+
+      console.log(`Score of user ${UID} increased by ${incrementAmount}.`);
+    } else {
+      console.log(`No user found with UID: ${UID}`);
+    }
+  } catch (error) {
+    console.error("Error increasing score:", error);
   }
 }
 
