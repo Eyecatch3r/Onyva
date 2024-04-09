@@ -5,7 +5,7 @@ import { getPostUrl } from "../services/persistence/post";
 function UserPost({ post }) {
   const [imageUrl, setImageUrl] = useState("");
 
-  const postData = post.data();
+  const postData = post;
   useEffect(() => {
     async function fetchImageUrl() {
       const url = await getPostUrl(post.id);

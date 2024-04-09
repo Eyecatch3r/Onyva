@@ -4,32 +4,52 @@ import { getPostsByUserID } from "../services/persistence/user";
 import { Link } from "react-router-dom";
 
 function UserPostsList({ user, userId }) {
-  const [posts, setPosts] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [sortPreference, setSortPreference] = useState("timestamp");
 
   async function getPosts() {
-    if (user) {
-      // Check if user is not null
-      const listPosts = await getPostsByUserID(userId);
-      setPosts(listPosts.docs);
-    }
+    const listPosts = await getPostsByUserID(userId);
+    // Assuming listPosts.docs is an array of posts
+    setPosts(listPosts.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
   }
 
   useEffect(() => {
     getPosts();
-  }, []);
+  }, [userId]);
 
+  // Sort posts based on the current preference
+  const sortedPosts = [...posts].sort((a, b) => {
+    if (sortPreference === "score") {
+      return b.Score - a.Score; // Assuming the score is stored in a field called `Score`
+    }
+    // Assuming the timestamp is stored in a field called `Timestamp`
+    return b.Timestamp.toDate() - a.Timestamp.toDate();
+  });
   return (
     <div className={"overflow-y-auto"} style={{ paddingBottom: "50px" }}>
-      {posts ? (
-        posts.map((p) => (
-          <div className={"overflow-x-auto"}>
+      <div className="form-control">
+        <label className="label">
+          <span className="ml-4 label-text font-bold">Sort By</span>
+        </label>
+        <select
+          className=" ml-6 mb-4 select select-ghost w-full max-w-xs"
+          value={sortPreference}
+          onChange={(e) => setSortPreference(e.target.value)}
+        >
+          <option value="timestamp">Timestamp</option>
+          <option value="score">Score</option>
+        </select>
+      </div>
+      {posts.length > 0 ? (
+        sortedPosts.map((post) => (
+          <div className={"overflow-x-auto"} key={post.id}>
             <Link
               data-te-ripple-init
               data-te-ripple-centered="true"
-              to={"/post/" + p.id}
-              params={{ post: p.id }}
+              to={"/post/" + post.id}
+              params={{ post: post.id }}
             >
-              <UserPost key={p.id} post={p} />
+              <UserPost post={post} />
             </Link>
           </div>
         ))
