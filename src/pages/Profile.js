@@ -1,103 +1,77 @@
-import "../App.css";
-import { auth } from "../services/firebase";
-import {
-  updatePfp,
-  getFriendList,
-  getUserByID,
-  getPfpUrlByID,
-  removeFriend,
-} from "../services/persistence/user";
 import React, { useEffect, useRef, useState } from "react";
-import withAuthCheck from "../components/AuthComponent";
-import { convertToJpg } from "../services/imageService";
+import "../App.css";
 import { Link, useParams } from "react-router-dom";
+import { useUser } from "../contexts/UserContext"; // Adjust this import path as needed
+import withAuthCheck from "../components/AuthComponent";
 import UserPostsList from "../components/UserPostsList";
+import {
+  getFriendList,
+  getPfpUrlByID,
+  getUserByID,
+  removeFriend,
+  updatePfp,
+} from "../services/persistence/user";
+import { convertToJpg } from "../services/imageService";
+import { auth } from "../services/firebase";
 
 function Profile() {
   const { userId } = useParams();
-  const [user, setUser] = useState(null); // New user state variable
-  const [email, setEmail] = useState("");
-  const [emailVerified, setEmailVerified] = useState(true);
-  const [imageUrl, setImageUrl] = useState(null);
+  const { userDetails } = useUser();
   const [friendList, setFriendList] = useState([]);
   const fileInputRef = useRef(null);
-  const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [showFriendsList, setShowFriendsList] = useState(false);
+  const isOwnProfile = userDetails?.id === userId; // Determine if the viewed profile is the current user's profile
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
       const fileConverted = await convertToJpg(file);
-      return await updatePfp(userId, file);
+      await updatePfp(userId, fileConverted); // Make sure to pass the converted file instead
     }
   };
 
   const handleProfileClick = () => {
-    if (fileInputRef && fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const getFriendPfp = async (ID) => {
-    const url = await getPfpUrlByID(ID);
-    return url;
+    fileInputRef.current?.click();
   };
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const url = await getPfpUrlByID(userId);
-        setImageUrl(null);
-        if (url) {
-          setImageUrl(url);
-        }
-        const fetchedUser = await getUserByID(userId); // Fetch user data
-        let friends = null;
-        if (fetchedUser) {
-          setUser(fetchedUser); // Set user state variable
-          setIsOwnProfile(fetchedUser.useruid === auth.currentUser.uid);
-          friends = fetchedUser.friends;
-        }
-
-        setEmailVerified(auth.currentUser.emailVerified);
-
+    async function fetchFriendList() {
+      if (userDetails) {
+        const friends = userDetails.friends;
         if (friends) {
           const friendList = [];
           for (const friend of friends) {
             const friendData = await getUserByID(friend.id);
-            console.log(friend.id);
             friendList.push({ data: friendData, id: friend.id });
           }
           setFriendList(friendList);
         }
-      } catch (error) {
-        // Handle errors if needed
-        console.error("Error fetching data:", error);
       }
     }
 
-    fetchData();
-  }, [userId]);
+    fetchFriendList();
+  }, [userId, userDetails]);
 
-  useEffect(() => {
-    if (isOwnProfile) {
-      setEmail(auth.currentUser.email);
-    }
-  }, [isOwnProfile]); // This effect runs whenever `isOwnProfile` changes
   function handleFriendRemove(uid, id) {
     try {
       removeFriend(uid, id);
-      setFriendList(friendList.filter((friend) => friend.id !== id));
+      setFriendList((currentList) =>
+        currentList.filter((friend) => friend.id !== id),
+      );
     } catch (error) {
       console.error("Error removing friend:", error);
     }
   }
 
+  const getFriendPfp = async (ID) => {
+    return await getPfpUrlByID(ID);
+  };
+
   return (
     <div className={"App"}>
       <div className="overflow-y-auto card bg-base-100 shadow-xl">
         <div className="card-body items-center text-center">
-          {isOwnProfile && !emailVerified && (
+          {isOwnProfile && !auth.currentUser.emailVerified && (
             <div role="alert" className="alert alert-warning">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -129,9 +103,9 @@ function Profile() {
                 />
               )}
               <div onClick={handleProfileClick}>
-                {imageUrl ? (
+                {userDetails?.imageUrl ? (
                   <img
-                    src={imageUrl}
+                    src={userDetails.imageUrl}
                     alt="Avatar"
                     className="transform hover:scale-105 transition duration-300 ease-in-out"
                   />
@@ -153,7 +127,9 @@ function Profile() {
           <div className="stats shadow">
             <div className="stat flex-wrap">
               <div className="stat-title">Score</div>
-              <div className="stat-value text-center">{user && user.score}</div>
+              <div className="stat-value text-center">
+                {userDetails && userDetails.score}
+              </div>
             </div>
           </div>
           <table className={"table"}>
@@ -164,7 +140,7 @@ function Profile() {
                     <div className="badge badge-primary badge-lg mr-2">
                       Username
                     </div>
-                    {user && user.username}
+                    {userDetails && userDetails.username}
                   </p>
                 </td>
               </tr>
@@ -175,7 +151,7 @@ function Profile() {
                       <div className="badge badge-primary badge-lg mr-2">
                         E-Mail Address
                       </div>
-                      <span>{email}</span>
+                      <span>{auth.currentUser.email}</span>
                     </p>
                   </td>
                 </tr>
@@ -275,7 +251,9 @@ function Profile() {
         </div>
       </div>
       <div className="divider divider-primary">User Posts</div>
-      {user && <UserPostsList user={user} userId={userId}></UserPostsList>}
+      {userDetails && (
+        <UserPostsList user={userDetails} userId={userId}></UserPostsList>
+      )}
     </div>
   );
 }

@@ -1,52 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import "../App.css";
 import { Link } from "react-router-dom";
-import { auth, signOutAccount } from "../services/firebase";
-import {
-  deleteNotificationByIndex,
-  getNotificationsByUID,
-  getPfpUrlByID,
-  getPfpUrlByUID,
-  getUserByID,
-  getUserByUID,
-} from "../services/persistence/user";
-import withAuthCheck from "./AuthComponent";
+import { signOutAccount } from "../services/firebase";
+import { useUser } from "../contexts/UserContext";
+import { deleteNotificationByIndex } from "../services/persistence/user";
 
 const Navbar = () => {
-  const [user, setUser] = useState(null);
-  const [imageUrl, setImageUrl] = useState(null);
-  const [score, setScore] = useState(null);
-  const [notifications, setNotifications] = useState([]);
-
-  async function fetchData() {
-    const currentUser = await getUserByUID(auth.currentUser.uid);
-    setUser(currentUser);
-  }
-
-  useEffect(() => {
-    console.log("Navbar mounted");
-    fetchData();
-  }, []);
-
-  // Use score directly from currentUser after it's set
-  useEffect(() => {
-    async function fetchUserData() {
-      if (user) {
-        const url = await getPfpUrlByID(user.id);
-        setImageUrl(url);
-        setScore(user.data().score);
-        const userNotifications = user.data().notifications;
-        setNotifications(userNotifications);
-        console.log("User fetched");
-      }
-    }
-
-    fetchUserData();
-  }, [user]);
+  const {
+    userDetails,
+    notifications,
+    deleteNotification,
+    addNotification,
+    setImageUrl,
+  } = useUser();
 
   function handleNotificationDelete(index) {
-    deleteNotificationByIndex(user.id, index);
-    notifications.splice(index, 1);
+    deleteNotification(index);
   }
 
   return (
@@ -60,7 +29,9 @@ const Navbar = () => {
         <div className="stats shadow">
           <div className="stat flex-wrap">
             <div className="stat-title">Score</div>
-            <div className="stat-value text-center">{score}</div>
+            <div className="stat-value text-center">
+              {userDetails ? userDetails.score : 0}
+            </div>
           </div>
         </div>
       </div>
@@ -146,8 +117,8 @@ const Navbar = () => {
             className="btn btn-ghost btn-circle avatar"
           >
             <div className="w-10 rounded-full">
-              {imageUrl ? (
-                <img alt="User Avatar" src={imageUrl} />
+              {userDetails?.imageUrl ? (
+                <img alt="User Avatar" src={userDetails.imageUrl} />
               ) : (
                 <img
                   alt="Default Avatar"
@@ -160,14 +131,10 @@ const Navbar = () => {
             tabIndex={0}
             className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
           >
-            {user && (
+            {userDetails && (
               <li>
-                <Link
-                  className="justify-between"
-                  to={{ pathname: `/profile/${user.id}` }}
-                >
+                <Link to={{ pathname: `/profile/${userDetails.id}` }}>
                   Profile
-                  <span className="badge">New</span>
                 </Link>
               </li>
             )}

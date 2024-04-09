@@ -2,17 +2,12 @@ import React, { useState, useRef, useCallback } from "react";
 import { LoadScript } from "@react-google-maps/api";
 import { Capacitor } from "@capacitor/core";
 import { Geolocation } from "@capacitor/geolocation";
-import { createPost } from "../services/persistence/post";
-import { auth } from "../services/firebase";
-import {
-  addNotificationByID,
-  getUserByUID,
-  increaseScore,
-} from "../services/persistence/user";
+import { useUser } from "../contexts/UserContext"; // Import useUser hook
 
 const libraries = ["places"];
 
 function CreatePostModal() {
+  const { createUserPost, addUserNotification, increaseUserScore } = useUser(); // Destructure functions from context
   const fileInputRef = useRef(null);
   const [landmarks, setLandmarks] = useState([]);
   const [selectedLandmark, setSelectedLandmark] = useState("");
@@ -96,33 +91,17 @@ function CreatePostModal() {
     }
   };
 
-  function handlePostUpload() {
+  const handlePostUpload = async () => {
     const file = fileInputRef.current.files[0];
     if (file && selectedLandmark) {
-      createPost(
-        auth.currentUser,
-        file,
-        score,
-        selectedLandmark,
-        location,
-      ).then(() => {
-        if (modalRef.current) {
-          modalRef.current.close();
-        }
-        increaseScore(auth.currentUser.uid, score);
-        getUserByUID(auth.currentUser.uid).then((user) => {
-          addNotificationByID(
-            user.id,
-            "You have created a post with a score of " +
-              score +
-              " at " +
-              selectedLandmark +
-              "!",
-          );
-        });
-      });
+      await createUserPost(file, score, selectedLandmark, location);
+      await addUserNotification(
+        `You have created a post with a score of ${score} at ${selectedLandmark}!`,
+      );
+      await increaseUserScore(score);
+      modalRef.current.close();
     }
-  }
+  };
 
   return (
     <>

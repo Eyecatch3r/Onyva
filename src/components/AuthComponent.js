@@ -5,6 +5,7 @@ import LoadingScreen from "./LoadingScreen";
 import Navbar from "./Navbar";
 import BottomNav from "./BottomNav";
 import { getUserByUID } from "../services/persistence/user";
+import { UserProvider } from "../contexts/UserContext";
 
 const withAuthCheck = (WrappedComponent) => {
   return (props) => {
@@ -23,10 +24,10 @@ const withAuthCheck = (WrappedComponent) => {
       return <LoadingScreen />;
     } else {
       return user ? (
-        <div>
+        <UserProvider>
           <Navbar></Navbar> <WrappedComponent {...props} />{" "}
           <BottomNav></BottomNav>
-        </div>
+        </UserProvider>
       ) : (
         <LoginSelection />
       );
