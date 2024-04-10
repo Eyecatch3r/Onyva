@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../App.css";
 import { Link, useParams } from "react-router-dom";
-import { useUser } from "../contexts/UserContext"; // Adjust this import path as needed
 import withAuthCheck from "../components/AuthComponent";
 import UserPostsList from "../components/UserPostsList";
 import {
@@ -11,57 +10,62 @@ import {
   removeFriend,
   updatePfp,
 } from "../services/persistence/user";
-import { convertToJpg } from "../services/imageService";
 import { auth } from "../services/firebase";
+import { convertToJpg } from "../services/imageService";
 
 function Profile() {
   const { userId } = useParams();
-  const { userDetails } = useUser();
+  const [userDetails, setUserDetails] = useState(null);
+  const [userPfpUrl, setUserPfpUrl] = useState("");
   const [friendList, setFriendList] = useState([]);
   const fileInputRef = useRef(null);
   const [showFriendsList, setShowFriendsList] = useState(false);
-  const isOwnProfile = userDetails?.id === userId; // Determine if the viewed profile is the current user's profile
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
+
+  useEffect(() => {
+    const fetchProfileDetails = async () => {
+      const userData = await getUserByID(userId);
+      if (userData) {
+        setUserDetails(userData);
+        setIsOwnProfile(auth.currentUser?.uid === userData.useruid);
+        const pfpUrl = await getPfpUrlByID(userId);
+        setUserPfpUrl(pfpUrl);
+
+        const fetchFriendList = async () => {
+          const friends = await getFriendList(userData.useruid);
+          setFriendList(friends);
+        };
+
+        if (userId) {
+          fetchFriendList();
+        }
+      }
+    };
+
+    fetchProfileDetails();
+  }, [userId]);
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
       const fileConverted = await convertToJpg(file);
-      await updatePfp(userId, fileConverted); // Make sure to pass the converted file instead
+      await updatePfp(userId, fileConverted);
+      // Optionally, update the profile picture URL in state to reflect the change immediately
+      const newPfpUrl = URL.createObjectURL(file);
+      setUserPfpUrl(newPfpUrl);
     }
   };
 
   const handleProfileClick = () => {
-    fileInputRef.current?.click();
+    if (isOwnProfile) {
+      fileInputRef.current?.click();
+    }
   };
 
-  useEffect(() => {
-    async function fetchFriendList() {
-      if (userDetails) {
-        const friends = userDetails.friends;
-        if (friends) {
-          const friendList = [];
-          for (const friend of friends) {
-            const friendData = await getUserByID(friend.id);
-            friendList.push({ data: friendData, id: friend.id });
-          }
-          setFriendList(friendList);
-        }
-      }
-    }
-
-    fetchFriendList();
-  }, [userId, userDetails]);
-
-  function handleFriendRemove(uid, id) {
-    try {
-      removeFriend(uid, id);
-      setFriendList((currentList) =>
-        currentList.filter((friend) => friend.id !== id),
-      );
-    } catch (error) {
-      console.error("Error removing friend:", error);
-    }
-  }
+  const handleFriendRemove = async (friendId) => {
+    await removeFriend(auth.currentUser.uid, friendId);
+    setFriendList(friendList.filter((friend) => friend.id !== friendId));
+  };
 
   const getFriendPfp = async (ID) => {
     return await getPfpUrlByID(ID);
@@ -103,9 +107,9 @@ function Profile() {
                 />
               )}
               <div onClick={handleProfileClick}>
-                {userDetails?.imageUrl ? (
+                {userPfpUrl ? (
                   <img
-                    src={userDetails.imageUrl}
+                    src={userPfpUrl}
                     alt="Avatar"
                     className="transform hover:scale-105 transition duration-300 ease-in-out"
                   />
@@ -214,7 +218,7 @@ function Profile() {
                         </Link>
                       </td>
                       <td className={"text-center"}>
-                        {friend.data.username}
+                        {friend.data().username}
                         <Link to={`/profile/${friend.id}`} key={index} />
                       </td>
                       <td
@@ -224,18 +228,13 @@ function Profile() {
                             : "rounded-r-3xl text-center"
                         }
                       >
-                        {friend.data.score}
+                        {friend.data().score}
                         <Link to={`/profile/${friend.id}`} key={index} />
                       </td>
                       {isOwnProfile && (
                         <td className={"rounded-r-3xl"}>
                           <button
-                            onClick={() =>
-                              handleFriendRemove(
-                                auth.currentUser.uid,
-                                friend.id,
-                              )
-                            }
+                            onClick={() => handleFriendRemove(friend.id)}
                             className="btn btn-primary btn-sm"
                           >
                             Remove friend

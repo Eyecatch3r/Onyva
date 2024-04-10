@@ -380,7 +380,9 @@ class MapPage extends Component {
                 <div className="stats shadow">
                   <div className="stat flex-wrap">
                     <div className="stat-title">Score</div>
-                    <div className="stat-value text-center">500</div>
+                    <div className="stat-value text-center">
+                      {Math.floor(Math.random() * 100)}
+                    </div>
                   </div>
                 </div>
               </div>

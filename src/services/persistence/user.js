@@ -237,9 +237,9 @@ export async function removeFriend(CurrentUserUID, friendId) {
   if (currentUserDoc) {
     const currentUserData = currentUserDoc.data();
     const friends = currentUserData.friends || [];
-
+    console.log(friends);
     const friendIndex = friends.findIndex(
-      (friendRef) => friendRef.id === friendId.id,
+      (friendRef) => friendRef.id === friendId,
     );
     if (friendIndex !== -1) {
       friends.splice(friendIndex, 1);

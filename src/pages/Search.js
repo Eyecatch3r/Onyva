@@ -26,16 +26,22 @@ function Search() {
       : "light";
 
   useEffect(() => {
-    getFriendList(auth.currentUser.uid).then((friends) => {
-      console.log(friends);
-      setFriendList(friends);
-    });
+    fetchFriendList();
   }, []);
+
+  const fetchFriendList = async () => {
+    const friends = await getFriendList(auth.currentUser.uid);
+    setFriendList(friends);
+  };
+
+  const addFriendButtonRefs = useRef({});
 
   const handleAddFriend = async (friendId) => {
     await addFriend(auth.currentUser.uid, friendId);
-    const newFriend = getUserByID(friendId);
-    setFriendList([...friendList, newFriend]);
+    await fetchFriendList(); // Refresh the friend list
+    if (addFriendButtonRefs.current[friendId]) {
+      addFriendButtonRefs.current[friendId].style.display = "none"; // Hide the button
+    }
   };
   const getUserPfp = async (ID) => {
     const url = await getPfpUrlByID(ID);
@@ -121,7 +127,7 @@ function Search() {
                   key={index}
                 >
                   <td className={"rounded-l-3xl"}>
-                    <Link to={`/profile/${user.id}`} key={index}>
+                    <a href={`/profile/${user.id}`} key={index}>
                       <div className="flex items-center gap-3">
                         <div className="avatar">
                           <div className="mask mask-squircle w-12 h-12">
@@ -135,7 +141,7 @@ function Search() {
                           </div>
                         </div>
                       </div>
-                    </Link>
+                    </a>
                   </td>
                   <td className={""}>
                     {user.data().username}
@@ -149,6 +155,9 @@ function Search() {
                       (friendRef) => friendRef.id === user.id,
                     ) ? (
                       <button
+                        ref={(el) =>
+                          (addFriendButtonRefs.current[user.id] = el)
+                        }
                         className={"ml-3 btn btn-xs"}
                         onClick={() => handleAddFriend(user.id)}
                       >
