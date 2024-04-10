@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getPostByID, getPostUrl } from "../services/persistence/post";
+import {
+  getPostByID,
+  getPostUrl,
+  toggleLikePost,
+} from "../services/persistence/post";
 import withAuthCheck from "../components/AuthComponent";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -8,6 +12,7 @@ import {
   getUserByID,
 } from "../services/persistence/user";
 import { Helmet } from "react-helmet";
+import { useUser } from "../contexts/UserContext";
 
 function Post() {
   const [imageUrl, setImageUrl] = useState("");
@@ -17,7 +22,7 @@ function Post() {
   const [user, setUser] = useState(null);
   const { postId } = useParams();
   const [pfpUrl, setPfpUrl] = useState("");
-
+  const { userDetails } = useUser();
   useEffect(() => {
     async function fetchPost() {
       const post = await getPostByID(postId);
@@ -50,6 +55,23 @@ function Post() {
     }
   }, [post]);
 
+  function handleLike() {
+    toggleLikePost(postId, userDetails.id).then((likeAdded) => {
+      if (likeAdded) {
+        setPost((prevPost) => ({
+          ...prevPost,
+          Likes: prevPost.Likes + 1,
+          LikedBy: [...prevPost.LikedBy, userDetails.id],
+        }));
+      } else
+        setPost((prevPost) => ({
+          ...prevPost,
+          Likes: prevPost.Likes - 1,
+          LikedBy: prevPost.LikedBy.filter((id) => id !== userDetails.id),
+        }));
+    });
+  }
+
   return (
     <div
       style={{ paddingBottom: "50px" }}
@@ -64,74 +86,70 @@ function Post() {
             <meta property="og:image" content={imageUrl} />
             <meta property="og:url" content={window.location.href} />
           </Helmet>
-          <div className="">
-            <div className="p-4">
-              <div className="flex items-center">
-                <Link to={`/profile/${post.User}`}>
-                  <img
-                    className="w-10 h-10 rounded-full mr-4"
-                    src={pfpUrl}
-                    alt="User"
-                  />
-                </Link>
-                <div>
-                  <p className="text-sm font-medium text-secondary">
-                    {user.username}
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    {dateString}, {timeString}
-                  </p>
-                </div>
+          <div className="p-4 flex justify-between items-center">
+            <Link to={`/profile/${post.User}`} className="flex items-center">
+              <img
+                className="w-10 h-10 rounded-full mr-4"
+                src={pfpUrl}
+                alt="User"
+              />
+              <div>
+                <p className="text-sm font-medium text-secondary">
+                  {user.username}
+                </p>
+                <p className="text-xs text-gray-600">
+                  {dateString}, {timeString}
+                </p>
               </div>
+            </Link>
+            <p className="text-lg font-semibold mb-0">
+              {post["Location Name"]}
+            </p>
+          </div>
+          <img
+            className="w-full h-96 object-cover" // Adjusted for consistency
+            src={imageUrl}
+            alt="Post"
+          />
+          <div className="flex justify-center mt-6">
+            <div className="stat content-center w-fit rounded-lg bg-base-300">
+              <div className="stat-title text-center">Points</div>
+              <div className="stat-value text-center">{post.Score}</div>
             </div>
-            <img
-              className="w-full h-96" // Tailwind CSS classes for width and height
-              style={{ objectFit: "cover" }} // Inline style for object-fit
-              src={imageUrl}
-              alt="Post"
-            />
-            <div className="p-4">
-              <div className={"flex justify-center mt-6"}>
-                <div className="stat content-center w-fit rounded-lg bg-base-300">
-                  <div className="stat-title text-center">Points</div>
-                  <div className="stat-value text-center">{post.Score}</div>
-                </div>
-              </div>
-              <p className="text-lg font-semibold mb-2">
-                {post["Location Name"]}
-              </p>
-              <p className="text-sm text-gray-800"></p>
-              <div className="flex justify-between items-center mt-4">
-                <button className="btn text-gray-600 hover:text-blue-500">
-                  Like
-                </button>
-                <button className="btn text-gray-600 hover:text-blue-500">
-                  Comment
-                </button>
+          </div>
+          <div className="">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
                 <button
-                  className="btn text-gray-600 hover:text-blue-500"
-                  onClick={async () => {
-                    if (navigator.share) {
-                      try {
-                        await navigator.share({
-                          title: post["Location Name"],
-                          url: window.location.href,
-                        });
-                      } catch (error) {
-                        console.error(
-                          "Something went wrong sharing the blog",
-                          error,
-                        );
-                      }
-                    } else {
-                      // Fallback for browsers that do not support navigator.share
-                      alert("Your browser does not support the share API");
-                    }
-                  }}
+                  onClick={handleLike}
+                  className="btn text-gray-600 hover:text-blue-500 mr-2"
                 >
-                  Share
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-6 h-6"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-6 h-6"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M15.05 7.044a1.933 1.933 0 0 0-3.407-1.735L8.472 9.75H5.857l-.75.75V18l.75.75h10.964l2.304-4.607A3.554 3.554 0 0 0 15.946 9h-1.548l.652-1.956ZM9.608 10.74l3.256-4.559a.433.433 0 0 1 .763.389l-1.31 3.93h3.63a2.054 2.054 0 0 1 1.836 2.972l-1.889 3.778H9.608v-6.51Zm-1.5 6.51h-1.5v-6h1.5v6Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </svg>
                 </button>
+                <span>{post.Likes}</span>
               </div>
+              <button className="btn text-gray-600 hover:text-blue-500">
+                Comment
+              </button>
             </div>
           </div>
         </div>

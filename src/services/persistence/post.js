@@ -6,6 +6,9 @@ import {
   getDocs,
   Timestamp,
   GeoPoint,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -34,6 +37,39 @@ export async function createPost(
   await updatePostImage(newPostID, image);
   console.log("Post created:", user.id);
 }
+
+export const toggleLikePost = async (postID, userID) => {
+  const postRef = doc(db, "Post", postID);
+  try {
+    const postSnapshot = await getDoc(postRef);
+    if (!postSnapshot.exists()) {
+      console.log("Post does not exist!");
+      return false; // Indicates no action was taken
+    }
+
+    const postData = postSnapshot.data();
+    const likedBy = postData.LikedBy || [];
+
+    if (likedBy.includes(userID)) {
+      // User has already liked the post, so remove their like
+      await updateDoc(postRef, {
+        Likes: postData.Likes > 0 ? postData.Likes - 1 : 0,
+        LikedBy: arrayRemove(userID),
+      });
+      return false; // Indicates like was removed
+    } else {
+      // User has not liked the post yet, so add their like
+      await updateDoc(postRef, {
+        Likes: postData.Likes + 1,
+        LikedBy: arrayUnion(userID),
+      });
+      return true; // Indicates like was added
+    }
+  } catch (error) {
+    console.error("Error toggling like on post:", error);
+    return false; // Indicates no action was taken
+  }
+};
 
 export async function getPostByID(postID) {
   const documentReference = doc(db, "Post", postID);
