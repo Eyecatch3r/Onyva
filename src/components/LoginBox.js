@@ -82,6 +82,9 @@ function LoginBox() {
               >
                 Login
               </button>
+              <Link to={"/"} className={"ml-8 btn-outline btn btn-primary"}>
+                Cancel
+              </Link>
             </div>
           </form>
           {error && (

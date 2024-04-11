@@ -28,7 +28,6 @@ function CreatePostModal() {
       placesServiceRef.current.nearbySearch(request, (results, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK) {
           setLandmarks(results);
-          console.log("Landmarks", results);
         }
       });
     }

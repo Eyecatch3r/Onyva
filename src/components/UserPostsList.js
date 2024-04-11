@@ -69,9 +69,7 @@ function UserPostsList({ userId }) {
         ) : posts.length > 0 ? (
           sortedPosts.map((post) => (
             <div className={"overflow-x-auto"} key={post.id}>
-              <Link to={"/post/" + post.id}>
-                <UserPost post={post} />
-              </Link>
+              <UserPost post={post} />
             </div>
           ))
         ) : null /* Do not display anything if not loading and no posts */

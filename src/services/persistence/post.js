@@ -94,7 +94,12 @@ export const getFriendsPosts = async (uid) => {
 
   for (let i = 0; i < friends.length; i++) {
     const friendPosts = await getPostsByUserID(friends[i].id);
-    allPosts = [...allPosts, ...friendPosts.docs.map((doc) => doc.data())];
+    // Adjust the mapping to include the post ID
+    const postsWithId = friendPosts.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    allPosts = [...allPosts, ...postsWithId];
   }
 
   return allPosts;

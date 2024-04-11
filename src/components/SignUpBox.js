@@ -128,6 +128,9 @@ function SignUpBox() {
             >
               Sign Up
             </button>
+            <Link to={"/"} className={"ml-8 btn-outline btn btn-primary"}>
+              Cancel
+            </Link>
           </form>
         </div>
         <div className="card-actions justify-center mb-3"></div>

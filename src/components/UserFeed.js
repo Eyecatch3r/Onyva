@@ -12,14 +12,7 @@ function UserFeed({ posts }) {
       {posts ? (
         posts.map((p) => (
           <div className={"overflow-x-auto"}>
-            <Link
-              data-te-ripple-init
-              data-te-ripple-centered="true"
-              to={"/post/" + p.id}
-              params={{ post: p.id }}
-            >
-              <UserPost key={p.id} post={p} />
-            </Link>
+            <UserPost key={p.id} post={p} />
           </div>
         ))
       ) : (

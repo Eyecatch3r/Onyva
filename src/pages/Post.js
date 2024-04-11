@@ -87,7 +87,7 @@ function Post() {
             <meta property="og:url" content={window.location.href} />
           </Helmet>
           <div className="p-4 flex justify-between items-center">
-            <Link to={`/profile/${post.User}`} className="flex items-center">
+            <Link to={`/profile/${post.User.id}`} className="flex items-center">
               <img
                 className="w-10 h-10 rounded-full mr-4"
                 src={pfpUrl}
