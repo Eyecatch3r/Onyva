@@ -31,10 +31,6 @@ function SignUpBox() {
   }
 
   const handleSignUp = async () => {
-    if (!validateUsername(username)) {
-      setError("Username already in use.");
-    }
-
     if (!validateEmail(email)) {
       setError("Please enter a valid email address.");
       return;
@@ -135,7 +131,10 @@ function SignUpBox() {
         </div>
         <div className="card-actions justify-center mb-3"></div>
         {error && (
-          <div role="alert" className="alert alert-error mb-3 mx-2 w-auto">
+          <div
+            role="alert"
+            className="animate-fade animate-ease-out alert alert-error flex flex-row mb-3 mx-2 w-auto"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="stroke-current shrink-0 h-6 w-6"

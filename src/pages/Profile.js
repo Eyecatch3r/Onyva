@@ -12,6 +12,7 @@ import {
 } from "../services/persistence/user";
 import { auth } from "../services/firebase";
 import { convertToJpg } from "../services/imageService";
+import { useUser } from "../contexts/UserContext";
 
 function Profile() {
   const { userId } = useParams();
@@ -21,7 +22,6 @@ function Profile() {
   const fileInputRef = useRef(null);
   const [showFriendsList, setShowFriendsList] = useState(false);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
-
   useEffect(() => {
     const fetchProfileDetails = async () => {
       const userData = await getUserByID(userId);

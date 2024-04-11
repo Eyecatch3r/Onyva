@@ -7,6 +7,7 @@ import {
   getPfpUrlByUID,
   getUserByUID,
   increaseScore,
+  updatePfp,
 } from "../services/persistence/user";
 import { createPost } from "../services/persistence/post";
 
@@ -90,6 +91,20 @@ export const UserProvider = ({ children }) => {
     );
   };
 
+  const changeProfilePicture = async (file) => {
+    const userId = userDetails?.id;
+    if (!userId) return;
+
+    // Call your service function to update the profile picture
+    await updatePfp(userId, file);
+
+    // Update local user details state
+    setUserDetails((prevDetails) => ({
+      ...prevDetails,
+      imageUrl: URL.createObjectURL(file),
+    }));
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -100,6 +115,7 @@ export const UserProvider = ({ children }) => {
         createUserPost,
         addUserNotification,
         increaseUserScore,
+        changeProfilePicture,
       }}
     >
       {children}

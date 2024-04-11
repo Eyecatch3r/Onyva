@@ -57,6 +57,7 @@ export const validateUsername = async (username) => {
       ? (usernameTaken = true)
       : (usernameTaken = false);
   });
+  console.log(usernameTaken);
   return usernameTaken;
 };
 
