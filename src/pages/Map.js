@@ -261,22 +261,40 @@ class MapPage extends Component {
 
   setCurrentLocation = async () => {
     if (Capacitor.isPluginAvailable("Geolocation")) {
-      try {
-        const position = await Geolocation.getCurrentPosition();
-        this.setState(
-          {
-            currentLocation: {
+      // Check location permissions
+      const permissions = await Geolocation.checkPermissions();
+      if (permissions.location === "granted") {
+        // Permissions are granted, proceed to get the current position
+        const options = {
+          enableHighAccuracy: true, // Request high accuracy location data
+          maximumAge: 0, // Accept only the freshest location data
+          timeout: 10000, // Maximum time to wait for a location (in milliseconds)
+        };
+
+        try {
+          const position = await Geolocation.getCurrentPosition(options);
+          this.setState(
+            {
+              currentLocation: {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              },
               lat: position.coords.latitude,
               lng: position.coords.longitude,
             },
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          },
-          this.fetchLandmarks,
-        );
-        console.log("Geolocation success:", position.coords);
-      } catch (error) {
-        console.error("Geolocation error:", error);
+            this.fetchLandmarks,
+          );
+          console.log("Geolocation success:", position.coords);
+        } catch (error) {
+          console.error("Geolocation error:", error);
+        }
+      } else {
+        console.log("Geolocation permissions not granted.");
+        Geolocation.requestPermissions().then(async (result) => {
+          if (result.location === "granted") {
+            window.location.reload();
+          }
+        });
       }
     } else {
       console.log("Geolocation is not supported by this browser.");
