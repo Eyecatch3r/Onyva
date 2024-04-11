@@ -5,8 +5,6 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import "tw-elements-react/dist/css/tw-elements-react.min.css";
-import BottomNav from "./components/BottomNav";
-import Navbar from "./components/Navbar";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
