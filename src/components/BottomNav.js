@@ -11,7 +11,7 @@ function BottomNav() {
   initTE({ Ripple });
   return (
     <div className={""}>
-      <div className="flex justify-between items center fixed inset-x-0 bottom-0  menu menu-lg menu-horizontal bg-base-200">
+      <div className="flex justify-between items center fixed inset-x-0 bottom-0 backdrop-blur-sm  menu menu-lg menu-horizontal ">
         <li>
           <NavLink
             className={
