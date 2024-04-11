@@ -1,5 +1,3 @@
-@import '@ionic/react/css/core.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
