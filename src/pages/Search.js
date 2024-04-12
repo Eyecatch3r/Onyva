@@ -86,7 +86,7 @@ function Search() {
           onClick={() => {
             handleSearch(inputRef.current.value);
           }}
-          data-te-ripple-init
+          data-te-ripple-init="true"
           data-te-ripple-centered="true"
           className="bg-primary relative px-3 py-2 -left-4 bg-none text-white  rounded"
         >

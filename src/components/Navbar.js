@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "../App.css";
 import { Link } from "react-router-dom";
 import { signOutAccount } from "../services/firebase";
 import { useUser } from "../contexts/UserContext";
 import { deleteNotificationByIndex } from "../services/persistence/user";
+import { initTE } from "tw-elements";
 
 const Navbar = () => {
   const {
@@ -13,6 +14,7 @@ const Navbar = () => {
     addNotification,
     setImageUrl,
   } = useUser();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   function handleNotificationDelete(index) {
     deleteNotification(index);
@@ -126,6 +128,7 @@ const Navbar = () => {
             tabIndex={0}
             role="button"
             className="btn btn-ghost btn-circle avatar"
+            onClick={() => setIsDrawerOpen(!isDrawerOpen)}
           >
             <div className="w-10 rounded-full">
               {userDetails?.imageUrl ? (
@@ -138,24 +141,31 @@ const Navbar = () => {
               )}
             </div>
           </div>
-          <ul
-            tabIndex={0}
-            className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
-          >
-            {userDetails && (
-              <li>
-                <Link to={{ pathname: `/profile/${userDetails.id}` }}>
-                  Profile
-                </Link>
-              </li>
-            )}
-            <li>
-              <Link to={"/settings"}>Settings</Link>
-            </li>
-            <li>
-              <p onClick={signOutAccount}>Sign Out</p>
-            </li>
-          </ul>
+          {isDrawerOpen && (
+            <div className="fixed top-0 bg-base-200 animate-fade-left animate-duration-100 animate-ease-linear right-0 w-3/4 md:w-1/2 lg:w-1/3 h-full z-50">
+              <div className="flex flex-col h-full shadow-xl">
+                <button
+                  onClick={() => setIsDrawerOpen(false)}
+                  className="btn btn-ghost self-end m-2 p-4"
+                >
+                  Close
+                </button>
+                <ul className="flex flex-col p-4">
+                  {userDetails && (
+                    <li className="btn btn-ghost p-2">
+                      <Link to={`/profile/${userDetails.id}`}>Profile</Link>
+                    </li>
+                  )}
+                  {/*<li className="btn btn-ghost p-2">
+                    <Link to="/settings">Settings</Link>
+                    </li>*/}
+                  <li className="btn btn-ghost p-2">
+                    <button onClick={signOutAccount}>Sign Out</button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
