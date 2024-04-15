@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, redirect } from "react-router-dom";
+import { Button } from "konsta/react";
+
 const AuthSelection = () => {
   const [selectedOption, setSelectedOption] = useState(null);
 
@@ -23,13 +25,13 @@ const AuthSelection = () => {
             Please Log in or Sign up for onYva
           </h3>
           <div className="modal-action justify-start">
-            <form method="dialog">
-              <button className="btn m-3">
+            <form method="dialog" className={"flex flex-row"}>
+              <Button clear={true} className="btn mr-4">
                 <Link to={"/login"}>Log in</Link>
-              </button>
-              <button className="btn">
+              </Button>
+              <Button clear={true} className="btn">
                 <Link to={"/Signup"}>Sign Up</Link>
-              </button>
+              </Button>
             </form>
           </div>
         </div>

@@ -2,7 +2,8 @@ import React, { useState, useRef, useCallback } from "react";
 import { LoadScript } from "@react-google-maps/api";
 import { Capacitor } from "@capacitor/core";
 import { Geolocation } from "@capacitor/geolocation";
-import { useUser } from "../contexts/UserContext"; // Import useUser hook
+import { useUser } from "../contexts/UserContext";
+import { Button } from "konsta/react"; // Import useUser hook
 
 const libraries = ["places"];
 
@@ -214,15 +215,17 @@ function CreatePostModal() {
               </div>
             </div>
             <div className="modal-action">
-              <button
+              <Button
                 disabled={!selectedLandmark || !imageURL}
                 onClick={handlePostUpload}
-                className="btn"
+                className="btn w-1/4"
               >
                 Post
-              </button>
+              </Button>
               <form method="dialog">
-                <button className="btn btn-ghost">Close</button>
+                <Button clear={true} className="btn btn-ghost">
+                  Close
+                </Button>
               </form>
             </div>
           </div>

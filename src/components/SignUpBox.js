@@ -9,6 +9,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { registerUser, validateUsername } from "../services/persistence/user";
+import { Button } from "konsta/react";
 
 function SignUpBox() {
   const [username, setUsername] = useState("");
@@ -117,16 +118,19 @@ function SignUpBox() {
                 onChange={(e) => setIsChecked(e.target.checked)}
               />
             </label>
-            <button
-              type={"button"}
-              className="btn btn-ghost"
-              onClick={handleSignUp}
-            >
-              Sign Up
-            </button>
-            <Link to={"/"} className={"ml-8 btn-outline btn btn-primary"}>
-              Cancel
-            </Link>
+            <div className={"flex flex-row"}>
+              <Button
+                clear={true}
+                type={"button"}
+                className="btn btn-ghost w-1/2"
+                onClick={handleSignUp}
+              >
+                Sign Up
+              </Button>
+              <Link to={"/"} className={"ml-8 btn-outline btn btn-primary"}>
+                Cancel
+              </Link>
+            </div>
           </form>
         </div>
         <div className="card-actions justify-center mb-3"></div>

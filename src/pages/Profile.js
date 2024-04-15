@@ -13,6 +13,7 @@ import {
 import { auth } from "../services/firebase";
 import { convertToJpg } from "../services/imageService";
 import { useUser } from "../contexts/UserContext";
+import { Button } from "konsta/react";
 
 function Profile() {
   const { userId } = useParams();
@@ -233,12 +234,12 @@ function Profile() {
                       </td>
                       {isOwnProfile && (
                         <td className={"rounded-r-3xl"}>
-                          <button
+                          <Button
                             onClick={() => handleFriendRemove(friend.id)}
                             className="btn btn-primary btn-sm"
                           >
                             Remove friend
-                          </button>
+                          </Button>
                         </td>
                       )}
                     </tr>

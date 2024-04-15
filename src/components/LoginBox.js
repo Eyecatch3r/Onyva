@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { signIn } from "../services/firebase";
 import { Link, useNavigate } from "react-router-dom";
+import { Button } from "konsta/react";
 
 function LoginBox() {
   const [email, setEmail] = useState("");
@@ -74,14 +75,15 @@ function LoginBox() {
                 </span>{" "}
               </label>
             </div>
-            <div className="card-actions justify-center mb-3">
-              <button
+            <div className="card-actions flex flex-row justify-center mb-3">
+              <Button
+                clear={true}
                 type={"button"}
-                className="btn btn-ghost"
+                className="btn btn-ghost w-1/2"
                 onClick={handleSignIn}
               >
                 Login
-              </button>
+              </Button>
               <Link to={"/"} className={"ml-8 btn-outline btn btn-primary"}>
                 Cancel
               </Link>
