@@ -5,6 +5,7 @@ import { getPfpUrlByID, getUserByID } from "../services/persistence/user";
 import moment from "moment";
 import { Link } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
+import { Button } from "konsta/react";
 
 function UserPost({ post }) {
   const [user, setUser] = useState({});
@@ -65,7 +66,7 @@ function UserPost({ post }) {
         </Link>
       </div>
       <figure className="overflow-hidden">
-        <Link to={`/post/${post.id}`} className="block">
+        <Link to={`/post/${post.id}`} className="touch-ripple-current block">
           <img src={imageUrl} alt="Post" className="object-cover w-full" />
         </Link>
       </figure>
@@ -83,7 +84,8 @@ function UserPost({ post }) {
         <div className="">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <button
+              <Button
+                clear={true}
                 onClick={handleLike}
                 className="btn text-gray-600 hover:text-blue-500 mr-2"
               >
@@ -107,12 +109,15 @@ function UserPost({ post }) {
                     />
                   </svg>
                 </svg>
-              </button>
+              </Button>
               <span>{Likes}</span>
             </div>
-            <button className="btn text-gray-600 hover:text-blue-500">
+            <Button
+              clear={true}
+              className="btn w-1/2 text-gray-600 hover:text-blue-500"
+            >
               Comment
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -50,7 +50,7 @@ const MainNavbar = () => {
           </a>
         }
         title={
-          <div className="">
+          <div className="rounded-full touch-ripple-white bg-base-300">
             <div className="stat flex-wrap">
               <div className="stat-title">Score</div>
               <div className=" text-center">

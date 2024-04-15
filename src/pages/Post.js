@@ -13,6 +13,7 @@ import {
 } from "../services/persistence/user";
 import { Helmet } from "react-helmet";
 import { useUser } from "../contexts/UserContext";
+import { Button } from "konsta/react";
 
 function Post() {
   const [imageUrl, setImageUrl] = useState("");
@@ -120,7 +121,8 @@ function Post() {
           <div className="">
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                <button
+                <Button
+                  clear={true}
                   onClick={handleLike}
                   className="btn text-gray-600 hover:text-blue-500 mr-2"
                 >
@@ -144,12 +146,15 @@ function Post() {
                       />
                     </svg>
                   </svg>
-                </button>
+                </Button>
                 <span>{post.Likes}</span>
               </div>
-              <button className="btn text-gray-600 hover:text-blue-500">
+              <Button
+                clear={true}
+                className="btn w-1/2 text-gray-600 hover:text-blue-500"
+              >
                 Comment
-              </button>
+              </Button>
             </div>
           </div>
         </div>
