@@ -9,7 +9,7 @@ import {
   getUsers,
 } from "../services/persistence/user";
 import { auth } from "../services/firebase";
-import { Ripple, initTE } from "tw-elements";
+import { Ripple } from "tw-elements";
 
 function Search() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,7 +19,6 @@ function Search() {
   const inputRef = useRef();
   const [friendList, setFriendList] = useState([]);
 
-  initTE({ Ripple });
   const getPreferredScheme = () =>
     window?.matchMedia?.("(prefers-color-scheme:dark)")?.matches
       ? "dark"

@@ -57,9 +57,7 @@ function UserPost({ post }) {
             alt="User"
           />
           <div>
-            <p className="text-sm font-medium text-secondary">
-              {user.username}
-            </p>
+            <p className="text-sm font-medium text-primary">{user.username}</p>
             <p className="text-xs text-gray-600">
               {dateString}, {timeString}
             </p>

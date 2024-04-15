@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { auth } from "../services/firebase";
 import LoginSelection from "./LoginSelection";
 import LoadingScreen from "./LoadingScreen";
-import Navbar from "./Navbar";
+import MainNavbar from "./MainNavbar";
 import BottomNav from "./BottomNav";
 import { getUserByUID } from "../services/persistence/user";
 import { UserProvider } from "../contexts/UserContext";
@@ -25,7 +25,7 @@ const withAuthCheck = (WrappedComponent) => {
     } else {
       return user ? (
         <UserProvider>
-          <Navbar></Navbar> <WrappedComponent {...props} />{" "}
+          <MainNavbar></MainNavbar> <WrappedComponent {...props} />{" "}
           <BottomNav></BottomNav>
         </UserProvider>
       ) : (
