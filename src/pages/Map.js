@@ -5,6 +5,7 @@ import Popup from "../components/Popup";
 import _ from "lodash";
 import { Capacitor } from "@capacitor/core";
 import { Geolocation } from "@capacitor/geolocation";
+import { fetchScore } from "../services/firebase";
 
 const containerStyle = {
   width: "100%",
@@ -324,6 +325,8 @@ class MapPage extends Component {
         const markers = results.map((place) => ({
           position: place.geometry.location,
           title: place.name,
+          rating: place.rating,
+          reviewCount: place.user_ratings_total,
         }));
         this.setState({ markers });
       }
@@ -399,7 +402,7 @@ class MapPage extends Component {
                   <div className="stat flex-wrap">
                     <div className="stat-title">Score</div>
                     <div className="stat-value text-center">
-                      {Math.floor(Math.random() * 100)}
+                      {fetchScore(marker.rating, marker.reviewCount, 20)}
                     </div>
                   </div>
                 </div>

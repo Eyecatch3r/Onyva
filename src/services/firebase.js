@@ -45,6 +45,21 @@ export const signOutAccount = () => {
   return signOut(auth);
 };
 
+export const fetchScore = async (rating, reviewCount, distance) => {
+  try {
+    const response = await fetch(
+      `https://getscore-xvp4yj3ueq-uc.a.run.app?rating=${rating}&reviewCount=${reviewCount}&distance=${distance}`,
+    );
+    const data = await response.json();
+    const score = Math.round(data.score);
+    console.log("Score", score);
+    return score;
+  } catch (error) {
+    console.error("Error fetching score", error);
+    return 0;
+  }
+};
+
 export const storage = getStorage(app);
 
 const analytics = getAnalytics(app);

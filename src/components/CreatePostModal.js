@@ -3,7 +3,8 @@ import { LoadScript } from "@react-google-maps/api";
 import { Capacitor } from "@capacitor/core";
 import { Geolocation } from "@capacitor/geolocation";
 import { useUser } from "../contexts/UserContext";
-import { Button } from "konsta/react"; // Import useUser hook
+import { Button } from "konsta/react";
+import { fetchScore } from "../services/firebase"; // Import useUser hook
 
 const libraries = ["places"];
 
@@ -70,10 +71,21 @@ function CreatePostModal() {
     }
   }, []);
 
-  const handleLandmarkChange = (event) => {
-    setSelectedLandmark(event.target.value);
-    setScore(Math.floor(Math.random() * 100));
+  const handleLandmarkChange = async (event) => {
+    const selected = event.target.value;
+    setSelectedLandmark(selected);
+
+    const landmark = landmarks.find((landmark) => landmark.name === selected);
+    if (landmark) {
+      const rating = landmark.rating || 0;
+      const reviewCount = landmark.user_ratings_total || 1; // Default to 1 to avoid division by zero
+      const distance = 20;
+
+      const calculatedScore = await fetchScore(rating, reviewCount, distance);
+      setScore(calculatedScore);
+    }
   };
+
   const handleFileInputClick = () => {
     fileInputRef.current.click();
   };
