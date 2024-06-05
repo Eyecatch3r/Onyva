@@ -112,12 +112,9 @@ function UserPost({ post }) {
               </Button>
               <span>{Likes}</span>
             </div>
-            <Button
-              clear={true}
-              className="btn w-1/2 text-gray-600 hover:text-blue-500"
-            >
+            <button className="btn text-gray-600 hover:text-blue-500">
               Comment
-            </Button>
+            </button>
           </div>
         </div>
       </div>
