@@ -12,13 +12,14 @@ import {
 import { db, storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
-export async function registerUser(userCredential, username) {
+export async function registerUser(userCredential, username, address) {
   const user = userCredential.user;
   await addDoc(collection(db, "User"), {
     username: username,
     useruid: user.uid,
     score: 0,
     notifications: [],
+    address: address,
   });
   console.log("User created:", user); // Log the user for debugging purposes
 }

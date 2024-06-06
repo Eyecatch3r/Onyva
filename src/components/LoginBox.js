@@ -76,14 +76,13 @@ function LoginBox() {
               </label>
             </div>
             <div className="card-actions flex flex-row justify-center mb-3">
-              <Button
-                clear={true}
+              <button
                 type={"button"}
                 className="btn btn-ghost w-1/2"
                 onClick={handleSignIn}
               >
                 Login
-              </Button>
+              </button>
               <Link to={"/"} className={"ml-8 btn-outline btn btn-primary"}>
                 Cancel
               </Link>

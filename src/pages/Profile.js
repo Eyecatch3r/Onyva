@@ -150,17 +150,28 @@ function Profile() {
                 </td>
               </tr>
               {isOwnProfile && (
-                <tr>
-                  <td>
-                    <p>
-                      <div className="badge badge-primary badge-lg mr-2">
-                        E-Mail Address
-                      </div>
-                      <span>{auth.currentUser.email}</span>
-                    </p>
-                  </td>
-                </tr>
-              )}
+                  <tr>
+                    <td>
+                      <p>
+                        <div className="badge badge-primary badge-lg mr-2">
+                          E-Mail Address
+                        </div>
+                        <span>{auth.currentUser.email}</span>
+                      </p>
+                    </td>
+                  </tr>
+                ) && (
+                  <tr>
+                    <td>
+                      <p>
+                        <div className="badge badge-primary badge-lg mr-2">
+                          Address
+                        </div>
+                        <span>{userDetails && userDetails.address}</span>
+                      </p>
+                    </td>
+                  </tr>
+                )}
             </tbody>
           </table>
         </div>

@@ -1,29 +1,61 @@
-import React, { useState } from "react";
-import {
-  auth,
-  createUser,
-  db,
-  sendVerificationEmail,
-} from "../services/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import React, { useState, useEffect } from "react";
+import { auth, createUser, sendVerificationEmail } from "../services/firebase";
 import { Link, useNavigate } from "react-router-dom";
-import { collection, addDoc, getDocs } from "firebase/firestore";
-import { registerUser, validateUsername } from "../services/persistence/user";
-import { Button } from "konsta/react";
+import { registerUser } from "../services/persistence/user";
+import { GoogleMap, useLoadScript, Marker } from "@react-google-maps/api";
 
 function SignUpBox() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [address, setAddress] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
   const [error, setError] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
+  const [suggestionsVisible, setSuggestionsVisible] = useState(false);
   const navigate = useNavigate();
 
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+    libraries: ["places"],
+  });
+
+  const handleInputChange = (e) => {
+    const input = e.target.value;
+    setAddress(input);
+
+    if (isLoaded && input.length > 3) {
+      const autocompleteService =
+        new window.google.maps.places.AutocompleteService();
+      autocompleteService.getPlacePredictions(
+        { input },
+        (predictions, status) => {
+          if (
+            status === window.google.maps.places.PlacesServiceStatus.OK &&
+            predictions
+          ) {
+            setSuggestions(predictions);
+            setSuggestionsVisible(true); // Show suggestions only if there are predictions
+          } else {
+            setSuggestions([]); // Clear suggestions if none are found
+            setSuggestionsVisible(false); // Hide the suggestions if there are no results
+          }
+        },
+      );
+    } else {
+      setSuggestions([]); // Clear suggestions for short inputs
+      setSuggestionsVisible(false); // Hide suggestions if the input length is less than or equal to 3
+    }
+  };
+
+  const handlePlaceSelect = (place) => {
+    setAddress(place.description);
+    setSuggestions([]);
+  };
+
   function trimErrorMessage(errorMessage) {
-    // Modify errorMessage as per your requirement
-    const index = errorMessage.indexOf("("); // Find the index of the first '('
+    const index = errorMessage.indexOf("(");
     if (index > 10) {
-      // Omit the first 10 characters and the content inside parentheses
       errorMessage =
         errorMessage.substring(10, index) +
         errorMessage.substring(errorMessage.indexOf(")") + 1);
@@ -42,18 +74,15 @@ function SignUpBox() {
       return;
     }
 
-    createUser(email, password)
+    createUser(email, password, address)
       .then(async (userCredential) => {
-        // Signed in
-        await registerUser(userCredential, username);
+        await registerUser(userCredential, username, address);
         await sendVerificationEmail(userCredential.user);
         navigate("/");
-        // Additional actions after successful signup
       })
       .catch((error) => {
-        const errorCode = error.code;
-        let errorMessage = error.message;
-        setError(errorMessage); // Set the modified error message for display
+        let errorMessage = trimErrorMessage(error.message);
+        setError(errorMessage);
         console.error("Error creating user:", error);
       });
   };
@@ -105,10 +134,46 @@ function SignUpBox() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </label>
+            <label className="form-control w-full max-w-xs">
+              <div className="label">
+                <span className="label-text">Address</span>
+              </div>
+              <input
+                type="text"
+                className="input input-bordered w-full max-w-xs"
+                placeholder="Address"
+                value={address}
+                id="address-input"
+                onFocus={() => setSuggestionsVisible(true)} // Show suggestions on focus
+                onBlur={() =>
+                  setTimeout(() => setSuggestionsVisible(false), 200)
+                }
+                onChange={handleInputChange}
+              />
+              {suggestions.length > 0 && (
+                <ul
+                  className={`bg-base-200 border border-gray-300 w-full mt-1 max-h-56 overflow-y-auto transform transition-all duration-300 ${
+                    suggestionsVisible
+                      ? "opacity-100 scale-100"
+                      : "h-0 opacity-0 scale-95"
+                  }`}
+                >
+                  {suggestions.map((suggestion) => (
+                    <li
+                      key={suggestion.place_id}
+                      className="p-2 cursor-pointer hover:bg-gray-200"
+                      onMouseDown={() => handlePlaceSelect(suggestion)}
+                    >
+                      {suggestion.description}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </label>
             <label className="label cursor-pointer">
               <span className="label-text">
                 I have read and agreed to the{" "}
-                <Link to={"/Privacy"}>Privacy Policy </Link>{" "}
+                <Link to={"/Privacy"}>Privacy Policy</Link>
               </span>
               <input
                 required={true}
@@ -119,14 +184,13 @@ function SignUpBox() {
               />
             </label>
             <div className={"flex flex-row"}>
-              <Button
-                clear={true}
+              <button
                 type={"button"}
                 className="btn btn-ghost w-1/2"
                 onClick={handleSignUp}
               >
                 Sign Up
-              </Button>
+              </button>
               <Link to={"/"} className={"ml-8 btn-outline btn btn-primary"}>
                 Cancel
               </Link>
@@ -154,7 +218,7 @@ function SignUpBox() {
             </svg>
             <span>{error}</span>
           </div>
-        )}{" "}
+        )}
       </div>
     </div>
   );
