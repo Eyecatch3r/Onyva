@@ -333,7 +333,9 @@ class MapPage extends Component {
         status === window.google.maps.places.PlacesServiceStatus.OK &&
         results
       ) {
-        const markers = results.map((place) => ({
+
+        const filteredResults = results.filter(result => result.user_ratings_total >= 5)
+        const markers = filteredResults.map((place) => ({
           position: place.geometry.location,
           title: place.name,
           rating: place.rating,
