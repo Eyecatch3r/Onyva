@@ -255,6 +255,8 @@ class MapPage extends Component {
       prefersLightMode: window.matchMedia("(prefers-color-scheme: light)")
         .matches,
       isApiLoaded: false,
+      selectedMarkerScore: 0,
+      isLoadingScore: false,
     };
   }
 
@@ -304,6 +306,15 @@ class MapPage extends Component {
     }
   };
 
+  fetchScorePromise = async (rating, reviewCount, distance) => {
+    try {
+      return await fetchScore(rating, reviewCount, distance);
+    } catch (error) {
+      console.error("Error fetching score", error);
+      return 0;
+    }
+  };
+
   fetchLandmarks = _.debounce(() => {
     if (!this.map || !window.google) {
       console.error("Google Maps API is not ready");
@@ -339,8 +350,15 @@ class MapPage extends Component {
     this.setCurrentLocation();
   };
 
-  onMarkerClick = (marker) => {
+  onMarkerClick = async (marker) => {
+    this.setState({ isLoadingScore: true, selectedMarkerScore: 0 });
     this.setState({ activeMarker: marker });
+    this.selectedMarkerScore = await this.fetchScorePromise(
+      marker.rating,
+      marker.reviewCount,
+      20,
+    );
+    this.setState({ isLoadingScore: false });
   };
 
   onCloseClick = () => {
@@ -356,7 +374,7 @@ class MapPage extends Component {
       <Marker
         key={marker.id}
         position={marker.position}
-        onClick={() => this.onMarkerClick(marker)}
+        onClick={async () => await this.onMarkerClick(marker)}
         icon={{
           // Specify your custom icon URL
           url: `${process.env.PUBLIC_URL}/marker.png`,
@@ -396,13 +414,16 @@ class MapPage extends Component {
                   </svg>
                 </button>
               </div>
-
               <div className={"flex items-center justify-center"}>
                 <div className="stats shadow">
                   <div className="stat flex-wrap">
                     <div className="stat-title">Score</div>
                     <div className="stat-value text-center">
-                      {fetchScore(marker.rating, marker.reviewCount, 20)}
+                      {this.isLoadingScore ? (
+                        <span className="loading loading-ring loading-sm"></span>
+                      ) : (
+                        this.selectedMarkerScore
+                      )}
                     </div>
                   </div>
                 </div>
