@@ -333,8 +333,9 @@ class MapPage extends Component {
         status === window.google.maps.places.PlacesServiceStatus.OK &&
         results
       ) {
-
-        const filteredResults = results.filter(result => result.user_ratings_total >= 5)
+        const filteredResults = results.filter(
+          (result) => result.user_ratings_total >= 5,
+        );
         const markers = filteredResults.map((place) => ({
           position: place.geometry.location,
           title: place.name,
@@ -379,7 +380,7 @@ class MapPage extends Component {
         onClick={async () => await this.onMarkerClick(marker)}
         icon={{
           // Specify your custom icon URL
-          url: `${process.env.PUBLIC_URL}/marker.png`,
+          url: `${process.env.PUBLIC_URL}/images/marker.png`,
           scaledSize: new window.google.maps.Size(30, 30), // Scale your icon
         }}
       >
@@ -458,7 +459,7 @@ class MapPage extends Component {
             <Marker
               position={currentLocation}
               icon={{
-                url: `${process.env.PUBLIC_URL}/currentLocation.png`, // Optional: Use a custom icon for the current location marker
+                url: `${process.env.PUBLIC_URL}/images/currentLocation.png`, // Optional: Use a custom icon for the current location marker
                 scaledSize: new window.google.maps.Size(15, 15),
               }}
               title="Your Current Location"

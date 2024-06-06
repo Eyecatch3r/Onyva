@@ -63,7 +63,7 @@ export const validateUsername = async (username) => {
 };
 
 export const getPfpUrlByUID = async (uid) => {
-  let url = null;
+  let url = `${process.env.PUBLIC_URL}/images/defaultpfp.png`;
   await getUserByUID(uid);
   try {
     url = await getDownloadURL(ref(storage, "Images/Profile Pictures/" + uid));
@@ -75,7 +75,7 @@ export const getPfpUrlByUID = async (uid) => {
 };
 
 export const getPfpUrlByID = async (id) => {
-  let url = null;
+  let url = `${process.env.PUBLIC_URL}/images/defaultpfp.png`;
   try {
     url = await getDownloadURL(ref(storage, "Images/Profile Pictures/" + id));
   } catch (error) {

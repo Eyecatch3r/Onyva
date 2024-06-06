@@ -31,7 +31,6 @@ function Profile() {
         setIsOwnProfile(auth.currentUser?.uid === userData.useruid);
         const pfpUrl = await getPfpUrlByID(userId);
         setUserPfpUrl(pfpUrl);
-
         const fetchFriendList = async () => {
           const friends = await getFriendList(userData.useruid);
           setFriendList(friends);
@@ -108,19 +107,11 @@ function Profile() {
                 />
               )}
               <div onClick={handleProfileClick}>
-                {userPfpUrl ? (
-                  <img
-                    src={userPfpUrl}
-                    alt="Avatar"
-                    className="transform hover:scale-105 transition duration-300 ease-in-out"
-                  />
-                ) : (
-                  <img
-                    src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
-                    alt="Avatar"
-                    className="transform hover:scale-105 transition duration-300 ease-in-out"
-                  />
-                )}
+                <img
+                  src={userPfpUrl}
+                  alt="Avatar"
+                  className="transform hover:scale-105 transition duration-300 ease-in-out"
+                />
                 {isOwnProfile && (
                   <p className="opacity-0 absolute inset-0 flex items-center justify-center text-white bg-black bg-opacity-75 group-hover:opacity-100 transition duration-300 ease-in-out">
                     Change Profile Picture
