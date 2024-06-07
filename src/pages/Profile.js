@@ -22,6 +22,8 @@ function Profile() {
   const fileInputRef = useRef(null);
   const [showFriendsList, setShowFriendsList] = useState(false);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [friendListpfps, setFriendListpfps] = useState([]);
+
   useEffect(() => {
     const fetchProfileDetails = async () => {
       const userData = await getUserByID(userId);
@@ -30,9 +32,16 @@ function Profile() {
         setIsOwnProfile(auth.currentUser?.uid === userData.useruid);
         const pfpUrl = await getPfpUrlByID(userId);
         setUserPfpUrl(pfpUrl);
+
         const fetchFriendList = async () => {
           const friends = await getFriendList(userData.useruid);
           setFriendList(friends);
+
+          const friendPfpPromises = friends.map((friend) =>
+            getPfpUrlByID(friend.id),
+          );
+          const friendPfpUrls = await Promise.all(friendPfpPromises);
+          setFriendListpfps(friendPfpUrls);
         };
 
         if (userId) {
@@ -207,13 +216,7 @@ function Profile() {
                           <div className="flex items-center gap-3">
                             <div className="avatar">
                               <div className="mask mask-squircle w-12 h-12">
-                                <img
-                                  src={
-                                    getFriendPfp(friend.id) &&
-                                    "https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
-                                  }
-                                  alt="Avatar"
-                                />
+                                <img src={friendListpfps[index]} alt="Avatar" />
                               </div>
                             </div>
                           </div>
