@@ -12,7 +12,6 @@ import {
 } from "../services/persistence/user";
 import { auth } from "../services/firebase";
 import { convertToJpg } from "../services/imageService";
-import { useUser } from "../contexts/UserContext";
 import { Button } from "konsta/react";
 
 function Profile() {
