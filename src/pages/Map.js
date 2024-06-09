@@ -13,11 +13,6 @@ import { fetchScore } from "../services/firebase";
 import { useUser } from "../contexts/UserContext";
 import { Suspense } from "react";
 
-const containerStyle = {
-  width: "100%",
-  height: "80vh",
-};
-
 const options = {
   fullscreenControl: false,
   mapTypeControl: false,
@@ -45,7 +40,7 @@ class CustomZoomControl extends Component {
   }
 }
 
-const libraries = ["places", "markers", "geometry", "geocoding"];
+const libraries = ["places", "geometry", "geocoding"];
 
 const MapPage = () => {
   const { userDetails } = useUser();
@@ -57,6 +52,7 @@ const MapPage = () => {
   const [prefersLightMode] = useState(
     window.matchMedia("(prefers-color-scheme: light)").matches,
   );
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [isApiLoaded, setIsApiLoaded] = useState(false);
   const [selectedMarkerScore, setSelectedMarkerScore] = useState(0);
   const [isLoadingScore, setIsLoadingScore] = useState(false);
@@ -65,10 +61,16 @@ const MapPage = () => {
   const geocoderRef = useRef(null);
 
   const fetchLandmarks = (location) => {
-    if (!placesService || !window.google) {
+    if (!Object.hasOwn(window, "google")) {
       console.error("Google Maps API is not ready");
       return;
     }
+
+    const placesService = new window.google.maps.places.PlacesService(
+      mapRef.current,
+    );
+    setPlacesService(placesService);
+    geocoderRef.current = new window.google.maps.Geocoder();
 
     const request = {
       location: new window.google.maps.LatLng(location.lat, location.lng),
@@ -98,9 +100,6 @@ const MapPage = () => {
   const handleApiLoaded = (map) => {
     setIsApiLoaded(true);
     mapRef.current = map;
-    const placesService = new window.google.maps.places.PlacesService(map);
-    setPlacesService(placesService);
-    geocoderRef.current = new window.google.maps.Geocoder();
   };
 
   useEffect(() => {
@@ -168,6 +167,10 @@ const MapPage = () => {
     if (isApiLoaded) {
       checkPermissionsAndFetchLocation();
     }
+
+    setTimeout(() => {
+      setIsMapLoaded(true);
+    }, 100);
   }, [lat, lng, isApiLoaded]);
 
   const fetchScorePromise = async (rating, reviewCount, distance) => {
@@ -229,10 +232,6 @@ const MapPage = () => {
         lat={marker.position.lat()}
         lng={marker.position.lng()}
         onClick={async () => await onMarkerClick(marker)}
-        icon={{
-          url: `${process.env.PUBLIC_URL}/images/marker.png`,
-          scaledSize: new window.google.maps.Size(30, 30),
-        }}
       >
         <svg
           className={"text-base-200"}
@@ -300,6 +299,33 @@ const MapPage = () => {
     ));
   };
 
+  function renderMap() {
+    return (
+      <GoogleMap
+        className="h-full overflow-y-hidden"
+        center={currentLocation || { lat, lng }}
+        onMapCapabilitiesChanged={handleApiLoaded}
+        mapOptions={prefersLightMode ? optionsLightMode : options}
+        zoom={15}
+      >
+        {isApiLoaded && currentLocation && (
+          <AdvancedMarker
+            lat={currentLocation.lat}
+            lng={currentLocation.lng}
+            title="Your Current Location"
+          >
+            <div
+              className={
+                "px-3 py-3 animate-box-shadow-pulse rounded-full bg-base-300 text-lg text-white"
+              }
+            ></div>
+          </AdvancedMarker>
+        )}
+        {isApiLoaded && renderMarkers()}
+      </GoogleMap>
+    );
+  }
+
   return (
     <Suspense fallback={<div />}>
       <GoogleMapApiLoader
@@ -307,29 +333,13 @@ const MapPage = () => {
         apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
         suspense
       >
-        <GoogleMap
-          className="h-full overflow-y-hidden"
-          mapContainerStyle={containerStyle}
-          onLoad={handleApiLoaded}
-          center={currentLocation || { lat, lng }}
-          zoom={15}
-          mapOptions={prefersLightMode ? optionsLightMode : options}
-        >
-          {isApiLoaded && currentLocation && (
-            <AdvancedMarker
-              lat={currentLocation.lat}
-              lng={currentLocation.lng}
-              title="Your Current Location"
-            >
-              <div
-                className={
-                  "px-3 py-3 animate-box-shadow-pulse rounded-full bg-base-300 text-lg text-white"
-                }
-              ></div>
-            </AdvancedMarker>
-          )}
-          {renderMarkers()}
-        </GoogleMap>
+        {isMapLoaded ? (
+          renderMap()
+        ) : (
+          <div className={"h-5/6 flex justify-center items-center"}>
+            <div className="loading loading-ring loading-lg"></div>
+          </div>
+        )}
       </GoogleMapApiLoader>
     </Suspense>
   );
