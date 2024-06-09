@@ -234,7 +234,7 @@ const MapPage = () => {
         onClick={async () => await onMarkerClick(marker)}
       >
         <svg
-          className={"text-base-200"}
+          className={"animate-drop-shadow-pulse text-base-200"}
           width={30}
           height={30}
           viewBox="0 0 24 24"
@@ -302,7 +302,7 @@ const MapPage = () => {
   function renderMap() {
     return (
       <GoogleMap
-        className="h-full overflow-y-hidden"
+        className={"h-[calc(100%-83px)]"}
         center={currentLocation || { lat, lng }}
         onMapCapabilitiesChanged={handleApiLoaded}
         mapOptions={prefersLightMode ? optionsLightMode : options}
