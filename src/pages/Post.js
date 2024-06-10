@@ -24,6 +24,7 @@ function Post() {
   const { postId } = useParams();
   const [pfpUrl, setPfpUrl] = useState("");
   const { userDetails } = useUser();
+
   useEffect(() => {
     async function fetchPost() {
       const post = await getPostByID(postId);

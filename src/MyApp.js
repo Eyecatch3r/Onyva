@@ -7,7 +7,7 @@ import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import ResetPassword from "./pages/ResetPassword";
 import Post from "./pages/Post";
-import Map from "./pages/Map";
+import MapPage from "./pages/Map";
 import { App, Page } from "konsta/react";
 
 function MyApp() {
@@ -22,7 +22,7 @@ function MyApp() {
           <Route path={"/resetpassword"} element={<ResetPassword />}></Route>
           <Route path={"/search"} element={<Search />}></Route>
           <Route path={"/post/:postId"} element={<Post />}></Route>
-          <Route path="/map" element={<Map />}></Route>
+          <Route path="/map" element={<MapPage />}></Route>
         </Routes>
       </Page>
     </App>

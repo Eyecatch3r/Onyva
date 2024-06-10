@@ -15,13 +15,7 @@ import {
 import { Link } from "react-router-dom";
 
 const MainNavbar = () => {
-  const {
-    userDetails,
-    notifications,
-    deleteNotification,
-    addNotification,
-    setImageUrl,
-  } = useUser();
+  const { userDetails, notifications, deleteNotification } = useUser();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [popoverOpened, setPopoverOpened] = useState(false);
   const popoverRef = useRef(null);
