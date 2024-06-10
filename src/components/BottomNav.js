@@ -14,9 +14,9 @@ function BottomNav() {
         <TabbarLink
           active={isActive("/")}
           onClick={() => {}}
-          iconOnly={false}
+          iconOnly={true}
           icon={
-            <NavLink to="/">
+            <NavLink reloadDocument={true} to="/">
               <svg
                 viewBox="0 0 24 24"
                 fill="currentColor"
@@ -34,7 +34,7 @@ function BottomNav() {
           onClick={() => {}}
           iconOnly={false}
           icon={
-            <NavLink to="/map">
+            <NavLink reloadDocument={true} to="/map">
               <svg
                 fill="none"
                 stroke="currentColor"

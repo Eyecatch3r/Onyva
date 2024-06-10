@@ -1,16 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { Geolocation } from "@capacitor/geolocation";
 import { fetchScore } from "../services/firebase";
 import {
   AdvancedMarker,
-  InfoWindow,
   Map,
   useMap,
   useMapsLibrary,
 } from "@vis.gl/react-google-maps";
 import { useUser } from "../contexts/UserContext";
-import { InfoBox } from "@react-google-maps/api";
+import Popup from "./Popup";
 
 const options = {
   fullscreenControl: true,
@@ -56,12 +55,13 @@ function MapLibraryComponent({ currentLocation }) {
       setGeometryLib(geo);
     }
     if (placesService && map) {
+      console.log(map);
       fetchLandmarks(currentLocation);
     }
   }, [pl, gc, geo, map, placesService, geocoder, geometryLib]);
 
   const fetchLandmarks = (location) => {
-    if (!placesService || !map) {
+    if (!placesService || !map || !Object.hasOwn(window, "google")) {
       console.error("Google Maps API is not ready");
       return;
     }
@@ -114,26 +114,6 @@ function MapLibraryComponent({ currentLocation }) {
     setActiveMarker(null);
   };
 
-  const getOffsetLatLng = (latLng, pixelOffset) => {
-    if (!projection) return latLng;
-
-    const worldCoordinate = projection.fromLatLngToPoint(latLng);
-    const scale = 2 ** map.getZoom();
-    const pixelCoordinate = new window.google.maps.Point(
-      worldCoordinate.x * scale + pixelOffset.x,
-      worldCoordinate.y * scale + pixelOffset.y,
-    );
-
-    const offsetLatLng = projection.fromPointToLatLng(
-      new window.google.maps.Point(
-        pixelCoordinate.x / scale,
-        pixelCoordinate.y / scale,
-      ),
-    );
-
-    return offsetLatLng;
-  };
-
   const renderMarkers = () => {
     return markers.map((marker, index) => {
       return (
@@ -162,47 +142,54 @@ function MapLibraryComponent({ currentLocation }) {
             </svg>
           </AdvancedMarker>
           {marker === activeMarker && (
-            <AdvancedMarker
-              position={getOffsetLatLng(marker.position, { x: 0, y: 0 })}
-              className="relative bg-base-200 p-4 mb-8 rounded animate-fade-left before:content-[''] before:absolute before:bottom-[-10px] before:left-1/2 before:transform before:-translate-x-1/2 before:border-8 before:border-transparent before:border-t-base-200"
+            <Popup
+              maps={window.google.maps}
+              map={map}
+              position={marker.position}
             >
-              <div className="card-actions justify-end">
-                <h2 className="font-bold text-xl mb-4">{marker.title}</h2>
-                <button
-                  className="btn btn-square btn-sm"
-                  onClick={onCloseClick}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+              <div
+                className={
+                  "animate-fade-right animate-once animate-ease-out bg-base-300 p-6 rounded"
+                }
+              >
+                <div className="card-actions justify-end">
+                  <h2 className="font-bold text-xl mb-4">{marker.title}</h2>
+                  <button
+                    className="btn btn-square btn-sm"
+                    onClick={onCloseClick}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-              <div className="flex items-center justify-center">
-                <div className="stats shadow">
-                  <div className="stat flex-wrap">
-                    <div className="stat-title">Score</div>
-                    <div className="stat-value text-center">
-                      {isLoadingScore ? (
-                        <span className="loading loading-ring loading-sm"></span>
-                      ) : (
-                        selectedMarkerScore
-                      )}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <div className="flex items-center justify-center">
+                  <div className="stats shadow">
+                    <div className="stat flex-wrap">
+                      <div className="stat-title">Score</div>
+                      <div className="stat-value text-center">
+                        {isLoadingScore ? (
+                          <span className="loading loading-ring loading-sm"></span>
+                        ) : (
+                          selectedMarkerScore
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </AdvancedMarker>
+            </Popup>
           )}
         </React.Fragment>
       );
