@@ -150,13 +150,15 @@ function Post() {
                 </Button>
                 <span>{post.Likes}</span>
               </div>
-              <Button
+            </div>
+            {/*
+            <Button
                 clear={true}
-                className="btn w-1/2 text-gray-600 hover:text-blue-500"
+                className="btn !w-1/2 text-gray-600 hover:text-blue-500"
               >
                 Comment
               </Button>
-            </div>
+            */}
           </div>
         </div>
       ) : (

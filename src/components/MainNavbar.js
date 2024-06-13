@@ -87,9 +87,9 @@ const MainNavbar = () => {
                     className="badge badge-primary"
                     style={{
                       position: "absolute",
-                      top: "-10px",
-                      right: "-12px",
-                      zIndex: 1,
+                      top: "1px",
+                      right: "2px",
+                      zIndex: 5,
                     }}
                   >
                     {notifications.length}
