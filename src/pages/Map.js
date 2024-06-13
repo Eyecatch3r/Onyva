@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import MapComponent from "../components/MapComponent";
 import withAuthCheck from "../components/AuthComponent";

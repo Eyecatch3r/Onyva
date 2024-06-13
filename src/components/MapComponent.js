@@ -301,12 +301,13 @@ const MapComponent = () => {
         style={{ height: "100%", width: "100%" }}
         defaultCenter={{ lat: lat, lng: lng }}
         defaultZoom={15}
+        reuseMaps={true}
         mapId={prefersLightMode ? optionsLightMode.mapId : options.mapId}
         fullscreenControlOptions={options.fullscreenControl}
         mapTypeControlOptions={options.mapTypeControl}
         streetViewControlOptions={options.streetViewControl}
         zoomControlOptions={options.zoomControl}
-        gestureHandling={"auto"}
+        gestureHandling={"greedy"}
         disableDefaultUI={true}
       >
         <AdvancedMarker position={{ lat: lat, lng: lng }}>
