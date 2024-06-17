@@ -230,7 +230,7 @@ function CreatePostModal() {
               <Button
                 disabled={!selectedLandmark || !imageURL}
                 onClick={handlePostUpload}
-                className="btn w-1/4"
+                className="btn !w-1/4"
               >
                 Post
               </Button>
