@@ -58,3 +58,9 @@
         transform: rotate(360deg);
     }
 }
+
+.title-wrap {
+    white-space: pre-wrap;
+    display: inline-block;
+    font-family: inherit; /* Ensures the font remains the same */
+}

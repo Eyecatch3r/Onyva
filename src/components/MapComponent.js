@@ -10,6 +10,8 @@ import {
 } from "@vis.gl/react-google-maps";
 import { useUser } from "../contexts/UserContext";
 import Popup from "./Popup";
+import { Navbar, Page, Panel } from "konsta/react";
+import { Link } from "react-router-dom";
 
 const options = {
   fullscreenControl: true,
@@ -80,10 +82,29 @@ function MapLibraryComponent({ currentLocation }) {
           title: place.name,
           rating: place.rating,
           reviewCount: place.user_ratings_total,
+          images: place.photos ? place.photos : null,
         }));
         setMarkers(newMarkers);
       }
     });
+  };
+
+  const addLineBreaks = (title, maxLength) => {
+    if (!title) return "";
+    const words = title.split(" ");
+    let formattedTitle = "";
+    let lineLength = 0;
+
+    words.forEach((word, index) => {
+      if (lineLength + word.length > maxLength) {
+        formattedTitle += "\n";
+        lineLength = 0;
+      }
+      formattedTitle += word + (index < words.length - 1 ? " " : "");
+      lineLength += word.length + 1;
+    });
+
+    return formattedTitle;
   };
 
   const onMarkerClick = async (marker) => {
@@ -141,56 +162,6 @@ function MapLibraryComponent({ currentLocation }) {
               />
             </svg>
           </AdvancedMarker>
-          {marker === activeMarker && (
-            <Popup
-              maps={window.google.maps}
-              map={map}
-              position={marker.position}
-            >
-              <div
-                className={
-                  "animate-fade-right animate-once animate-ease-out bg-base-300 p-6 rounded"
-                }
-              >
-                <div className="card-actions justify-end">
-                  <h2 className="font-bold text-xl mb-4">{marker.title}</h2>
-                  <button
-                    className="btn btn-square btn-sm"
-                    onClick={onCloseClick}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-                <div className="flex items-center justify-center">
-                  <div className="stats shadow">
-                    <div className="stat flex-wrap">
-                      <div className="stat-title">Score</div>
-                      <div className="stat-value text-center">
-                        {isLoadingScore ? (
-                          <span className="loading loading-ring loading-sm"></span>
-                        ) : (
-                          selectedMarkerScore
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Popup>
-          )}
         </React.Fragment>
       );
     });
@@ -219,7 +190,72 @@ function MapLibraryComponent({ currentLocation }) {
     }
   };
 
-  return renderMarkers();
+  return (
+    <>
+      {renderMarkers()}
+      <Panel
+        side={"right"}
+        className={"z-50"}
+        opened={activeMarker}
+        onBackdropClick={onCloseClick}
+      >
+        <Page className={"z-50"}>
+          <Navbar
+            className={"z-50"}
+            title={
+              <span>
+                {addLineBreaks(activeMarker ? activeMarker.title : "", 20)}
+              </span>
+            }
+            titleClassName={"title-wrap"}
+            right={
+              <Link navbar onClick={onCloseClick}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </Link>
+            }
+          />
+          {activeMarker && (
+            <div className="flex mt-4 items-center justify-center">
+              <div className="stats shadow">
+                <div className="stat flex-wrap">
+                  <div className="stat-title">Score</div>
+                  <div className="stat-value text-center">
+                    {isLoadingScore ? (
+                      <span className="loading loading-ring loading-sm"></span>
+                    ) : (
+                      selectedMarkerScore
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {activeMarker?.images && (
+            <div className={"h-96 carousel m-4 carousel-vertical rounded-box"}>
+              {activeMarker.images.map((image, index) => (
+                <div id={index} className="carousel-item h-full">
+                  <img src={image.getUrl()} alt={activeMarker?.title} />
+                </div>
+              ))}
+            </div>
+          )}
+        </Page>
+      </Panel>
+    </>
+  );
 }
 
 const MapComponent = () => {
@@ -298,7 +334,7 @@ const MapComponent = () => {
     <div className={"h-[calc(100%-83px)] w-full"}>
       <Map
         id="map"
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "100%", width: "100%", zIndex: "auto" }}
         defaultCenter={{ lat: lat, lng: lng }}
         defaultZoom={15}
         reuseMaps={true}
