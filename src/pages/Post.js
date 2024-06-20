@@ -14,6 +14,7 @@ import {
 import { Helmet } from "react-helmet";
 import { useUser } from "../contexts/UserContext";
 import { Button } from "konsta/react";
+import moment from "moment/moment";
 
 function Post() {
   const [imageUrl, setImageUrl] = useState("");
@@ -49,10 +50,11 @@ function Post() {
     }
 
     if (post) {
-      console.log(post);
-      const date = new Date(post.Timestamp.seconds * 1000);
-      setDateString(date.toLocaleDateString());
-      setTimeString(date.toLocaleTimeString());
+      const postDate = post.Timestamp.toDate();
+      const dateString = moment(postDate).format("LL"); // e.g., "September 4, 1986"
+      const timeString = moment(postDate).format("LT"); // e.g., "5:00 PM"
+      setDateString(dateString);
+      setTimeString(timeString);
       fetchUser();
     }
   }, [post]);
@@ -125,7 +127,7 @@ function Post() {
                 <Button
                   clear={true}
                   onClick={handleLike}
-                  className="btn text-gray-600 hover:text-blue-500 mr-2"
+                  className="btn !z-0 text-gray-600 hover:text-blue-500 mr-2"
                 >
                   <svg
                     viewBox="0 0 20 20"

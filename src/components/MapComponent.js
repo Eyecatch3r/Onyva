@@ -207,7 +207,7 @@ function MapLibraryComponent({ currentLocation }) {
                 {addLineBreaks(activeMarker ? activeMarker.title : "", 20)}
               </span>
             }
-            titleClassName={"title-wrap"}
+            titleClassName={"h-fit title-wrap"}
             right={
               <Link navbar onClick={onCloseClick}>
                 <svg
