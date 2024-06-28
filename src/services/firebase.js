@@ -5,11 +5,19 @@ import {
   signOut,
   sendEmailVerification,
   sendPasswordResetEmail,
+  indexedDBLocalPersistence,
+  initializeAuth,
 } from "firebase/auth";
 import { initializeApp } from "firebase/app";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import {
+  getFirestore,
+  connectFirestoreEmulator,
+  initializeFirestore,
+  persistentLocalCache,
+} from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 import { getStorage } from "firebase/storage";
+import { Capacitor } from "@capacitor/core";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -23,8 +31,23 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache(/*settings*/ {}),
+});
 
-export const auth = getAuth(app);
+function whichAuth() {
+  let auth;
+  if (Capacitor.isNativePlatform()) {
+    auth = initializeAuth(app, {
+      persistence: indexedDBLocalPersistence,
+    });
+  } else {
+    auth = getAuth();
+  }
+  return auth;
+}
+
+export const auth = whichAuth();
 
 export const sendVerificationEmail = (user) => {
   return sendEmailVerification(user);
@@ -63,7 +86,6 @@ export const fetchScore = async (rating, reviewCount, distance) => {
 export const storage = getStorage(app);
 
 const analytics = getAnalytics(app);
-export const db = getFirestore(app);
 
 if (window.location.hostname === "localhost") {
   //connectFirestoreEmulator(db, "localhost", 8080);
