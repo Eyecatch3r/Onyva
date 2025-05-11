@@ -1,70 +1,84 @@
-# Getting Started with Create React App
+# onYva
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A cross-platform social app for sharing and discovering posts on an interactive map. Built with React, Capacitor, Firebase, and Google Maps APIs, onYva enables users to create, explore, and interact with location-based content seamlessly on web and mobile.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- 🔐 **User Authentication** (Sign up, Login, Password Reset)
+- 🗺️ **Interactive Map** with Google Maps integration
+- 📝 **Create & View Posts** with location tagging
+- 👤 **User Profiles** and personalized feeds
+- 🔍 **Search** for places and posts
+- ♾️ **Infinite Scroll** for feeds
+- ⚡ **Real-time updates** via Firebase
+- 📱 **Mobile-ready** with Capacitor (Android/iOS)
+- ☁️ **Serverless Functions** (e.g., Google Maps review scoring)
+- 🎨 **Modern UI** with TailwindCSS, DaisyUI, and tw-elements
 
-### `npm start`
+## Getting Started
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Prerequisites
+- Node.js (v16+ recommended)
+- npm
+- Firebase CLI (`npm install -g firebase-tools`)
+- [Google Maps API Key](https://developers.google.com/maps/documentation/javascript/get-api-key)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Installation
 
-### `npm test`
+1. **Clone the repository:**
+   ```bash
+   git clone <repo-url>
+   cd onyva
+   ```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+3. **Set up environment variables:**
+   - Copy `.env.example` to `.env` and fill in your Firebase and Google Maps API keys.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+4. **Firebase setup:**
+   - Initialize Firebase: `firebase init`
+   - Emulators: `firebase emulators:start` (for local dev)
 
-### `npm run build`
+5. **Run the app:**
+   ```bash
+   npm start
+   ```
+   The app will be available at [http://localhost:3000](http://localhost:3000)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Scripts
+- `npm start` — Start the development server
+- `npm run build` — Build for production
+- `npm test` — Run tests
+- `npm run eject` — Eject configuration (not recommended)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Mobile (Capacitor)
+- `npx cap add android` / `npx cap add ios` — Add mobile platforms
+- `npx cap open android` / `npx cap open ios` — Open native IDE
+- `npx cap sync` — Sync web code to native
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Firebase Functions
+- Located in `/functions`
+- Example: `getScore` — Calculates a score based on Google Maps review data
 
-### `npm run eject`
+### Project Structure
+- `src/pages/` — Main app pages (Home, Map, Search, Profile, etc.)
+- `src/components/` — Reusable UI components
+- `src/services/persistence/` — Data management (user, post)
+- `functions/` — Firebase serverless backend
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Contributing
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Fork the repo and create your branch (`git checkout -b feature/your-feature`)
+2. Commit your changes (`git commit -am 'Add new feature'`)
+3. Push to the branch (`git push origin feature/your-feature`)
+4. Open a Pull Request
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## License
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+MIT
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+*onYva — Explore, Share, Connect.*
